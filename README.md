@@ -8,7 +8,6 @@ Rust workspace for the TruthLinked chain: consensus, runtime (Axiom VM), network
 - `src/` — top-level binaries (node, trth-keygen, bench, spammer, etc.)
 - `Dockerfile.node`, `docker-compose.yml` — single-node container deployment
 - `genesis_bootnode.json`, `genesis_validator.json` — example genesis files
-- `start_network.sh`, `start_v1_gateway.sh` — reference scripts for multi-validator devnet (see also the Docker path)
 
 ## Version
 
