@@ -7,9 +7,15 @@ It signs transactions (postcard + post-quantum signatures) and submits them to t
 ## Build / install
 
 ```bash
+git clone https://github.com/truth-linked/truthlinked.git
+cd truthlinked
 cargo build --release -p axiom-cli
-# -> target/release/axiom
+# binary lands at target/release/axiom
+```
 
+Or install directly:
+
+```bash
 cargo install --path crates/axiom-cli
 ```
 

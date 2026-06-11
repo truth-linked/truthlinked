@@ -19,18 +19,25 @@ The `axiom` binary is the primary user interface for accounts, sending value (na
 
 ### Build / install
 
-From the workspace root:
-
 ```bash
-cargo build --release -p axiom-cli
-# binary lands at target/release/axiom
+git clone https://github.com/truth-linked/truthlinked.git
+cd truthlinked
+cargo build --release
 ```
 
-Or install directly:
+Binaries are in `target/release/`:
+- `node` — the full validator/consensus node
+- `axiom` — the CLI
+
+Install the Axiom CLI to your PATH:
 
 ```bash
 cargo install --path crates/axiom-cli
 ```
+
+Run the node directly after build: `./target/release/node`
+
+See Docker single-node section for the easiest containerized deployment.
 
 ### Keys and configuration
 
