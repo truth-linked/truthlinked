@@ -179,7 +179,6 @@ The container builds the node from source and runs with `--single-node`. RPC is 
 To let other nodes discover this one as a bootnode, run:
 
 ```bash
-./print-bootnode-addr.sh keys/validator.keys <your-public-ip> 19080
 ```
 
 and pass the printed string to other nodes via `--bootnodes`.
