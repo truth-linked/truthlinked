@@ -1,8 +1,8 @@
 //! Axiom Cell template - build with: cargo build --release
 //! Deploy with: axiom deploy-cell --cell-id <hex> --bytecode-file <path>
 
-use truthlinked_axiom_sdk::CellBuilder;
-use truthlinked_axiom_sdk::abi;
+use truthlinked_sdk::CellBuilder;
+use truthlinked_sdk::abi;
 
 fn main() {
     let bytecode = build_cell();

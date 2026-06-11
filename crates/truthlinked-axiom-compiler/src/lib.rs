@@ -36,8 +36,8 @@ pub fn compile(src: &str) -> Result<CompileOutput, CompileError> {
     let ast = parser::parse(tokens)?;
     typeck::check(&ast)?;
     let ir = lower::lower(&ast);
-    let alloc = truthlinked_axiom_sdk::regalloc::allocate(&ir);
-    let bytecode = truthlinked_axiom_sdk::codegen::emit(&ir, &alloc);
+    let alloc = truthlinked_sdk::regalloc::allocate(&ir);
+    let bytecode = truthlinked_sdk::codegen::emit(&ir, &alloc);
     let manifest = manifest::generate(&ast);
     Ok(CompileOutput { bytecode, manifest })
 }

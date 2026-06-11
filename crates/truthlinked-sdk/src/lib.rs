@@ -5,7 +5,7 @@
 //!
 //! # Example (low-level)
 //! ```rust
-//! use truthlinked_axiom_sdk::CellBuilder;
+//! use truthlinked_sdk::CellBuilder;
 //!
 //! let bytecode = CellBuilder::new()
 //!     .require_owner()

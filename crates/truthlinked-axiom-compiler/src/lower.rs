@@ -8,7 +8,7 @@
 
 use crate::ast::*;
 use std::collections::HashMap;
-use truthlinked_axiom_sdk::ir::{Ir, Label, VReg};
+use truthlinked_sdk::ir::{Ir, Label, VReg};
 
 pub struct Lowerer<'a> {
     cell: &'a CellDef,
@@ -32,7 +32,7 @@ impl<'a> Lowerer<'a> {
             .storage
             .iter()
             .map(|s| {
-                let key = truthlinked_axiom_sdk::hashing::namespace(&s.name);
+                let key = truthlinked_sdk::hashing::namespace(&s.name);
                 (s.name.clone(), key.to_vec())
             })
             .collect();
@@ -115,7 +115,7 @@ impl<'a> Lowerer<'a> {
         if has_init {
             let lbl = self.label();
             handler_labels.push(("init".to_string(), lbl));
-            let sel = truthlinked_axiom_sdk::abi::selector_of("init");
+            let sel = truthlinked_sdk::abi::selector_of("init");
             let mut sel32 = vec![0u8; 32];
             sel32[..4].copy_from_slice(&sel);
             self.push(Ir::LoadConst(v_sel, sel32));
@@ -126,7 +126,7 @@ impl<'a> Lowerer<'a> {
         for f in &all_pub {
             let lbl = self.label();
             handler_labels.push((f.name.clone(), lbl));
-            let sel = truthlinked_axiom_sdk::abi::selector_of(&f.name);
+            let sel = truthlinked_sdk::abi::selector_of(&f.name);
             let mut sel32 = vec![0u8; 32];
             sel32[..4].copy_from_slice(&sel);
             self.push(Ir::LoadConst(v_sel, sel32));
@@ -587,7 +587,7 @@ impl<'a> Lowerer<'a> {
                 //   BufWriteConst([selector 4 bytes])
                 //   BufWriteReg(arg0), BufWriteReg(arg1), ...
                 //   BufCallCell(cell_v, value_v)
-                let sel = truthlinked_axiom_sdk::abi::selector_of(method);
+                let sel = truthlinked_sdk::abi::selector_of(method);
                 let sel_bytes = sel.to_vec();
                 // Pad selector to 32 bytes so BufWriteConst writes a clean word,
                 // then we only use the first 4 bytes - actually write exactly 4 bytes.
@@ -631,7 +631,7 @@ impl<'a> Lowerer<'a> {
                     }
                 };
                 let slot_key = self.slot_keys.get(&base_name).cloned().unwrap_or_else(|| {
-                    truthlinked_axiom_sdk::hashing::namespace(&base_name).to_vec()
+                    truthlinked_sdk::hashing::namespace(&base_name).to_vec()
                 });
                 let key_v = self.vreg();
                 self.lower_expr_into(key, key_v, scope);
@@ -655,9 +655,9 @@ impl<'a> Lowerer<'a> {
                         return;
                     }
                 };
-                let mut field_key = truthlinked_axiom_sdk::hashing::namespace(&base_name).to_vec();
+                let mut field_key = truthlinked_sdk::hashing::namespace(&base_name).to_vec();
                 field_key.extend_from_slice(field.as_bytes());
-                let derived = truthlinked_axiom_sdk::hashing::sha256(&field_key);
+                let derived = truthlinked_sdk::hashing::sha256(&field_key);
                 let kv = self.vreg();
                 self.push(Ir::LoadConst(kv, derived.to_vec()));
                 self.push(Ir::SLoad(dst, kv));
@@ -698,7 +698,7 @@ impl<'a> Lowerer<'a> {
             LValue::Index { base, key } => {
                 let slot_key =
                     self.slot_keys.get(base).cloned().unwrap_or_else(|| {
-                        truthlinked_axiom_sdk::hashing::namespace(base).to_vec()
+                        truthlinked_sdk::hashing::namespace(base).to_vec()
                     });
                 let key_v = self.vreg();
                 self.lower_expr_into(key, key_v, scope);
@@ -710,9 +710,9 @@ impl<'a> Lowerer<'a> {
                 self.push(Ir::SLoad(dst, derived_v));
             }
             LValue::Field { base, field } => {
-                let mut field_key = truthlinked_axiom_sdk::hashing::namespace(base).to_vec();
+                let mut field_key = truthlinked_sdk::hashing::namespace(base).to_vec();
                 field_key.extend_from_slice(field.as_bytes());
-                let derived = truthlinked_axiom_sdk::hashing::sha256(&field_key);
+                let derived = truthlinked_sdk::hashing::sha256(&field_key);
                 let kv = self.vreg();
                 self.push(Ir::LoadConst(kv, derived.to_vec()));
                 self.push(Ir::SLoad(dst, kv));
@@ -726,7 +726,7 @@ impl<'a> Lowerer<'a> {
             LValue::Index { base, key } => {
                 let slot_key =
                     self.slot_keys.get(base).cloned().unwrap_or_else(|| {
-                        truthlinked_axiom_sdk::hashing::namespace(base).to_vec()
+                        truthlinked_sdk::hashing::namespace(base).to_vec()
                     });
                 let key_v = self.vreg();
                 self.lower_expr_into(key, key_v, scope);
@@ -738,9 +738,9 @@ impl<'a> Lowerer<'a> {
                 self.push(Ir::SStore(derived_v, src));
             }
             LValue::Field { base, field } => {
-                let mut field_key = truthlinked_axiom_sdk::hashing::namespace(base).to_vec();
+                let mut field_key = truthlinked_sdk::hashing::namespace(base).to_vec();
                 field_key.extend_from_slice(field.as_bytes());
-                let derived = truthlinked_axiom_sdk::hashing::sha256(&field_key);
+                let derived = truthlinked_sdk::hashing::sha256(&field_key);
                 let kv = self.vreg();
                 self.push(Ir::LoadConst(kv, derived.to_vec()));
                 self.push(Ir::SStore(kv, src));
@@ -760,7 +760,7 @@ impl<'a> Lowerer<'a> {
             LValue::Index { base, key } => {
                 let slot_key =
                     self.slot_keys.get(base).cloned().unwrap_or_else(|| {
-                        truthlinked_axiom_sdk::hashing::namespace(base).to_vec()
+                        truthlinked_sdk::hashing::namespace(base).to_vec()
                     });
                 let key_v = self.vreg();
                 self.lower_expr_into(key, key_v, scope);
@@ -770,9 +770,9 @@ impl<'a> Lowerer<'a> {
                 self.push(Ir::Hash32(kv, kv));
             }
             LValue::Field { base, field } => {
-                let mut field_key = truthlinked_axiom_sdk::hashing::namespace(base).to_vec();
+                let mut field_key = truthlinked_sdk::hashing::namespace(base).to_vec();
                 field_key.extend_from_slice(field.as_bytes());
-                let derived = truthlinked_axiom_sdk::hashing::sha256(&field_key);
+                let derived = truthlinked_sdk::hashing::sha256(&field_key);
                 self.push(Ir::LoadConst(kv, derived.to_vec()));
             }
         }

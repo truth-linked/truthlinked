@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["crates/truthlinked-axiom", "crates/truthlinked-axiom-sdk", "crates/truthlinked-axiom-macro", "crates/truthlinked-axiom-compiler", "crates/axiom-cli", "crates/truthlinked-core", "crates/truthlinked-governance", "crates/truthlinked-staking", "crates/truthlinked-oracle", "crates/truthlinked-runtime", "crates/truthlinked-mcp", "crates/truthlinked-consensus", "crates/truthlinked-net", "trth-keygen", "donadb", "donadb-rel", "explorer-indexer"]
+members = ["crates/truthlinked-axiom", "crates/truthlinked-sdk", "crates/truthlinked-axiom-macro", "crates/truthlinked-axiom-compiler", "crates/axiom-cli", "crates/truthlinked-core", "crates/truthlinked-governance", "crates/truthlinked-staking", "crates/truthlinked-oracle", "crates/truthlinked-runtime", "crates/truthlinked-mcp", "crates/truthlinked-consensus", "crates/truthlinked-net", "trth-keygen", "donadb", "donadb-rel", "explorer-indexer"]
 
 [profile.release]
 opt-level = 3

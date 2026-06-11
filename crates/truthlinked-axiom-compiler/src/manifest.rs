@@ -4,7 +4,7 @@
 
 use crate::ast::*;
 use serde::Serialize;
-use truthlinked_axiom_sdk::hashing::namespace;
+use truthlinked_sdk::hashing::namespace;
 
 /// Matches truthlinked_core::cells::StorageKeySpec exactly.
 /// offset/len describe where in the calldata a 32-byte storage key argument lives.

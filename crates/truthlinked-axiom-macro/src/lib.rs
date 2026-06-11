@@ -65,7 +65,7 @@ fn expand_cell(module: ItemMod) -> syn::Result<TS2> {
     for (_sel_idx, sel) in selectors.iter().enumerate() {
         let sel_name = &sel.name;
         selector_entries.push(quote! {
-            (#sel_name, truthlinked_axiom_sdk::abi::selector_of(#sel_name))
+            (#sel_name, truthlinked_sdk::abi::selector_of(#sel_name))
         });
 
         let handler_label = next_label;
@@ -99,7 +99,7 @@ fn expand_cell(module: ItemMod) -> syn::Result<TS2> {
                 ir.push(Ir::LoadImm8(#v_cd, 0));
                 ir.push(Ir::GetCalldata(#v_cd, #v_cd));
                 // Load selector constant
-                let sel_bytes = truthlinked_axiom_sdk::abi::selector_of(#sel_name);
+                let sel_bytes = truthlinked_sdk::abi::selector_of(#sel_name);
                 let mut sel32 = vec![0u8; 32];
                 sel32[..4].copy_from_slice(&sel_bytes);
                 ir.push(Ir::LoadConst(#v_sel, sel32));
@@ -247,9 +247,9 @@ fn expand_cell(module: ItemMod) -> syn::Result<TS2> {
         }
 
         pub fn #bytecode_fn() -> Vec<u8> {
-            use truthlinked_axiom_sdk::ir::Ir;
-            use truthlinked_axiom_sdk::regalloc;
-            use truthlinked_axiom_sdk::codegen;
+            use truthlinked_sdk::ir::Ir;
+            use truthlinked_sdk::regalloc;
+            use truthlinked_sdk::codegen;
 
             let mut ir: Vec<Ir> = Vec::new();
             #(#all_ir_code)*
@@ -489,7 +489,7 @@ fn lower_expr_stmt(expr: &Expr, slots: &[StorageSlot], helpers: &[HelperFn]) -> 
                 };
                 return quote! {
                     let _kv = { _vreg += 1; _vreg };
-                    let key = truthlinked_axiom_sdk::hashing::namespace(#key_str);
+                    let key = truthlinked_sdk::hashing::namespace(#key_str);
                     ir.push(Ir::LoadConst(_kv, key.to_vec()));
                     ir.push(Ir::SStore(_kv, #val_vreg));
                 };
@@ -609,7 +609,7 @@ fn lower_expr_to_vreg(expr: &Expr, dst_expr: TS2, helpers: &[HelperFn]) -> TS2 {
                 quote! {
                     {
                         let _kv = { _vreg += 1; _vreg };
-                        let key = truthlinked_axiom_sdk::hashing::namespace(#key_str);
+                        let key = truthlinked_sdk::hashing::namespace(#key_str);
                         ir.push(Ir::LoadConst(_kv, key.to_vec()));
                         ir.push(Ir::SLoad(#dst_expr, _kv));
                     }
@@ -753,7 +753,7 @@ fn lower_call_to_vreg(
             return quote! {
                 let _d = #dst;
                 let _kv = { _vreg += 1; _vreg };
-                let key = truthlinked_axiom_sdk::hashing::namespace(#key_str);
+                let key = truthlinked_sdk::hashing::namespace(#key_str);
                 ir.push(Ir::LoadConst(_kv, key.to_vec()));
                 ir.push(Ir::SLoad(_d, _kv));
             };

@@ -1,5 +1,5 @@
 [package]
-name = "truthlinked-axiom-sdk"
+name = "truthlinked-sdk"
 version = "0.1.3"
 edition = "2021"
 description = "TruthLinked Axiom Cell SDK — IR pipeline, regalloc, codegen, CellBuilder"
@@ -7,7 +7,7 @@ authors = ["TruthLinked Labs <Donatus@truthlinked.org>"]
 license = "MIT"
 homepage = "https://truthlinked.org"
 repository = "https://github.com/truth-linked/truthlinked"
-documentation = "https://docs.rs/truthlinked-axiom-sdk"
+documentation = "https://docs.rs/truthlinked-sdk"
 keywords = ["truthlinked", "axiom", "sdk", "blockchain", "cells"]
 categories = ["development-tools", "cryptography"]
 include = ["Cargo.toml", "src/**/*.rs", "template/**/*"]
