@@ -1,0 +1,11 @@
+[package]
+name = "truthlinked-axiom-macro"
+version = "0.2.0"
+edition = "2021"
+description = "Procedural macros that support cell development on TruthLinked (events, manifests, codecs, etc.)."
+authors = ["TruthLinked Labs <dev@truthlinked.org>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/truth-linked/truthlinked"
+keywords = ["truthlinked", "axiom", "macro", "cell"]
+categories = ["development-tools::procedural-macro-helpers"]

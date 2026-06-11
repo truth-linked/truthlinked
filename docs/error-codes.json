@@ -1,0 +1,384 @@
+{
+  "rpc_exact": [
+    {
+      "code": 1001,
+      "message": "account_id must be hex"
+    },
+    {
+      "code": 1002,
+      "message": "account_id must be 32 bytes (64 hex chars)"
+    },
+    {
+      "code": 1003,
+      "message": "account_id must be 64 hex chars"
+    },
+    {
+      "code": 1004,
+      "message": "Invalid account_id format (must be 32-byte hex)"
+    },
+    {
+      "code": 1005,
+      "message": "pubkey must be hex"
+    },
+    {
+      "code": 1006,
+      "message": "pubkey must be 1952 bytes (Dilithium, 3904 hex chars)"
+    },
+    {
+      "code": 1007,
+      "message": "cell_id must be hex"
+    },
+    {
+      "code": 1008,
+      "message": "cell_id must be 32 bytes (64 hex chars)"
+    },
+    {
+      "code": 1009,
+      "message": "cell_id and account_id must be 32 bytes each"
+    },
+    {
+      "code": 1010,
+      "message": "proposal_id must be hex"
+    },
+    {
+      "code": 1011,
+      "message": "proposal_id must be 32 bytes (64 hex chars)"
+    },
+    {
+      "code": 1012,
+      "message": "nft_id must be hex"
+    },
+    {
+      "code": 1013,
+      "message": "nft_id must be 32 bytes (64 hex chars)"
+    },
+    {
+      "code": 1014,
+      "message": "owner must be hex"
+    },
+    {
+      "code": 1015,
+      "message": "owner must be 32 bytes (64 hex chars)"
+    },
+    {
+      "code": 1201,
+      "message": "resolve only supports .tl names; use /search for hashes or IDs"
+    },
+    {
+      "code": 1202,
+      "message": "name expired"
+    },
+    {
+      "code": 1203,
+      "message": "name not found"
+    },
+    {
+      "code": 4001,
+      "message": "Storage not initialized"
+    }
+  ],
+  "rpc_rules": [
+    {
+      "code": 4003,
+      "match": "prefix match",
+      "pattern": "Failed to deserialize transaction:"
+    },
+    {
+      "code": 4004,
+      "match": "prefix match",
+      "pattern": "Failed to load transaction history:"
+    },
+    {
+      "code": 4002,
+      "match": "contains match",
+      "pattern": "Node is syncing; try again later"
+    },
+    {
+      "code": 4101,
+      "match": "contains match",
+      "pattern": "Direct calls to MCP tools are not permitted"
+    },
+    {
+      "code": 4102,
+      "match": "contains match",
+      "pattern": "McpToolCall requires action_log_id"
+    }
+  ],
+  "fallback": {
+    "rule": "blake3(error_bytes)[0..4] as u32 & 0x7fffffff, negated if not mapped"
+  },
+  "axiom_vm": [
+    {
+      "code": 2000,
+      "symbol": "UsdcError::UnknownSelector"
+    },
+    {
+      "code": 2001,
+      "symbol": "UsdcError::NotOwner"
+    },
+    {
+      "code": 2002,
+      "symbol": "UsdcError::AlreadyInitialized"
+    },
+    {
+      "code": 2003,
+      "symbol": "UsdcError::NotInitialized"
+    },
+    {
+      "code": 2004,
+      "symbol": "UsdcError::NotMintAuthority"
+    },
+    {
+      "code": 2005,
+      "symbol": "UsdcError::NotFreezeAuthority"
+    },
+    {
+      "code": 2006,
+      "symbol": "UsdcError::InvalidFrom"
+    },
+    {
+      "code": 2007,
+      "symbol": "UsdcError::InvalidAmount"
+    },
+    {
+      "code": 2008,
+      "symbol": "UsdcError::MissingParam"
+    },
+    {
+      "code": 2100,
+      "symbol": "UsdtError::UnknownSelector"
+    },
+    {
+      "code": 2101,
+      "symbol": "UsdtError::NotOwner"
+    },
+    {
+      "code": 2102,
+      "symbol": "UsdtError::AlreadyInitialized"
+    },
+    {
+      "code": 2103,
+      "symbol": "UsdtError::NotInitialized"
+    },
+    {
+      "code": 2104,
+      "symbol": "UsdtError::NotMintAuthority"
+    },
+    {
+      "code": 2105,
+      "symbol": "UsdtError::NotFreezeAuthority"
+    },
+    {
+      "code": 2106,
+      "symbol": "UsdtError::InvalidFrom"
+    },
+    {
+      "code": 2200,
+      "symbol": "StakingError::UnknownSelector"
+    },
+    {
+      "code": 2201,
+      "symbol": "StakingError::BadCalldata"
+    },
+    {
+      "code": 2202,
+      "symbol": "StakingError::InvalidPubkey"
+    },
+    {
+      "code": 2203,
+      "symbol": "StakingError::Unauthorized"
+    },
+    {
+      "code": 2204,
+      "symbol": "StakingError::ZeroAmount"
+    },
+    {
+      "code": 2300,
+      "symbol": "GovError::UnknownSelector"
+    },
+    {
+      "code": 2301,
+      "symbol": "GovError::BadCalldata"
+    },
+    {
+      "code": 2302,
+      "symbol": "GovError::InvalidPubkey"
+    },
+    {
+      "code": 2303,
+      "symbol": "GovError::Unauthorized"
+    },
+    {
+      "code": 2304,
+      "symbol": "GovError::ProposalExists"
+    },
+    {
+      "code": 2305,
+      "symbol": "GovError::ProposalMissing"
+    },
+    {
+      "code": 2306,
+      "symbol": "GovError::VotingClosed"
+    },
+    {
+      "code": 2307,
+      "symbol": "GovError::VotingOpen"
+    },
+    {
+      "code": 2308,
+      "symbol": "GovError::Timelock"
+    },
+    {
+      "code": 2309,
+      "symbol": "GovError::AlreadyVoted"
+    },
+    {
+      "code": 2310,
+      "symbol": "GovError::QuorumNotMet"
+    },
+    {
+      "code": 2311,
+      "symbol": "GovError::ZeroStake"
+    },
+    {
+      "code": 2400,
+      "symbol": "TreasuryError::UnknownSelector"
+    },
+    {
+      "code": 2401,
+      "symbol": "TreasuryError::BadCalldata"
+    },
+    {
+      "code": 2402,
+      "symbol": "TreasuryError::InvalidBucket"
+    },
+    {
+      "code": 2403,
+      "symbol": "TreasuryError::ZeroAmount"
+    },
+    {
+      "code": 2404,
+      "symbol": "TreasuryError::ProposalExists"
+    },
+    {
+      "code": 2405,
+      "symbol": "TreasuryError::ProposalMissing"
+    },
+    {
+      "code": 2406,
+      "symbol": "TreasuryError::VotingClosed"
+    },
+    {
+      "code": 2407,
+      "symbol": "TreasuryError::VotingOpen"
+    },
+    {
+      "code": 2408,
+      "symbol": "TreasuryError::Timelock"
+    },
+    {
+      "code": 2409,
+      "symbol": "TreasuryError::AlreadyVoted"
+    },
+    {
+      "code": 2410,
+      "symbol": "TreasuryError::QuorumNotMet"
+    },
+    {
+      "code": 2411,
+      "symbol": "TreasuryError::ZeroStake"
+    },
+    {
+      "code": 2412,
+      "symbol": "TreasuryError::InsufficientBucket"
+    },
+    {
+      "code": 2500,
+      "symbol": "NameRegistryError::UnknownSelector"
+    },
+    {
+      "code": 2501,
+      "symbol": "NameRegistryError::BadCalldata"
+    },
+    {
+      "code": 2600,
+      "symbol": "TokenGovError::UnknownSelector"
+    },
+    {
+      "code": 2601,
+      "symbol": "TokenGovError::BadCalldata"
+    },
+    {
+      "code": 2700,
+      "symbol": "OracleGovError::UnknownSelector"
+    },
+    {
+      "code": 2701,
+      "symbol": "OracleGovError::BadCalldata"
+    },
+    {
+      "code": 2800,
+      "symbol": "PolicyError::BadCalldata"
+    },
+    {
+      "code": 2801,
+      "symbol": "PolicyError::Unauthorized"
+    },
+    {
+      "code": 2802,
+      "symbol": "PolicyError::Suspended"
+    },
+    {
+      "code": 2803,
+      "symbol": "PolicyError::ToolDenied"
+    },
+    {
+      "code": 2804,
+      "symbol": "PolicyError::RateLimited"
+    },
+    {
+      "code": 2805,
+      "symbol": "PolicyError::SpendPerTxExceeded"
+    },
+    {
+      "code": 2806,
+      "symbol": "PolicyError::SpendEpochExceeded"
+    },
+    {
+      "code": 2807,
+      "symbol": "PolicyError::HitlRequired"
+    },
+    {
+      "code": 2900,
+      "symbol": "VetrthError::UnknownSelector"
+    },
+    {
+      "code": 2901,
+      "symbol": "VetrthError::BadCalldata"
+    },
+    {
+      "code": 2902,
+      "symbol": "VetrthError::Unauthorized"
+    },
+    {
+      "code": 2903,
+      "symbol": "VetrthError::ZeroAmount"
+    },
+    {
+      "code": 2904,
+      "symbol": "VetrthError::InvalidLockDuration"
+    },
+    {
+      "code": 2905,
+      "symbol": "VetrthError::PositionMissing"
+    },
+    {
+      "code": 2906,
+      "symbol": "VetrthError::NotMatured"
+    },
+    {
+      "code": 2907,
+      "symbol": "VetrthError::VeBalanceZero"
+    }
+  ]
+}

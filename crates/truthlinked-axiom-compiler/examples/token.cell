@@ -1,0 +1,49 @@
+cell token {
+    error Unauthorized;
+    error InsufficientBalance;
+    error Frozen;
+
+    storage owner: address;
+    storage total_supply: u128 commutative;
+
+    init(initial_owner: address) {
+        owner = initial_owner;
+        total_supply = 0;
+    }
+
+    pub fn mint(to: address, amount: u128) {
+        require caller == owner;
+        token::mint(self, to, amount);
+        total_supply += amount;
+        emit Mint { to, amount };
+    }
+
+    pub fn burn(from: address, amount: u128) {
+        require caller == owner;
+        token::burn(self, from, amount);
+        total_supply -= amount;
+        emit Burn { from, amount };
+    }
+
+    pub fn transfer(to: address, amount: u128) {
+        token::transfer(self, caller, to, amount);
+        emit Transfer { from: caller, to, amount };
+    }
+
+    pub fn balance_of(account: address) -> u128 {
+        let bal = token::balance(self, account);
+        return bal;
+    }
+
+    pub fn get_owner() -> address {
+        return owner;
+    }
+
+    pub fn get_total_supply() -> u128 {
+        return total_supply;
+    }
+
+    fn _only_owner() {
+        require caller == owner;
+    }
+}

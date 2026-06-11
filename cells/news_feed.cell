@@ -1,0 +1,49 @@
+cell news_feed {
+    error Unauthorized;
+    error NoDataYet;
+
+    storage owner: address;
+    storage last_headline: u256;
+    storage last_request_id: u256;
+    storage last_updated: u64;
+
+    init(initial_owner: address) {
+        owner = initial_owner;
+        last_headline = 0;
+        last_request_id = 0;
+        last_updated = 0;
+    }
+
+    /// Fetch the latest top headline from Google News RSS (no API key needed).
+    pub fn request() -> u256 {
+        require caller == owner;
+        let req_id = accord::request(
+            "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en",
+            "GET",
+            ""
+        );
+        last_request_id = req_id;
+        emit HeadlineRequested { req_id };
+        return req_id;
+    }
+
+    /// Settle the pending request and store the headline hash.
+    pub fn settle() {
+        let req_id = last_request_id;
+        let data = accord::read(req_id);
+        require data != 0;
+        last_headline = data;
+        let h = height;
+        last_updated = h;
+        emit HeadlineSettled { data, h };
+    }
+
+    pub fn get_headline() -> u256 {
+        require last_headline != 0;
+        return last_headline;
+    }
+
+    pub fn get_last_updated() -> u64 {
+        return last_updated;
+    }
+}

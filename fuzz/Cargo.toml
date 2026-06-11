@@ -1,0 +1,37 @@
+[package]
+name = "truthlinked-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+bytes = "1"
+donadb = { path = "../donadb" }
+libfuzzer-sys = "0.4"
+tempfile = "3"
+
+[[bin]]
+name = "wal_corruption"
+path = "fuzz_targets/wal_corruption.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sst_corruption"
+path = "fuzz_targets/sst_corruption.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "snapshot_corruption"
+path = "fuzz_targets/snapshot_corruption.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

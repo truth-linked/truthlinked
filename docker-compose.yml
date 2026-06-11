@@ -1,0 +1,57 @@
+# TruthLinked - Single Node (generic for public github + keygen)
+#
+# Keep this compose EMPTY / generic. No server paths, no pre-baked validator1.
+# New users after git clone:
+#   1. cargo build --release -p axiom-cli
+#   2. ./target/release/axiom account-create
+#   3. mkdir -p keys && cp ~/.truthlinked/default.keys keys/validator.keys
+#   4. cp genesis_bootnode.json genesis.json
+#   5. docker compose up -d
+# RPC on 19941. For other nodes: ./print-bootnode-addr.sh keys/validator.keys
+#
+# The image (Dockerfile.node) builds the node itself.
+
+services:
+  single-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: tl-single-node
+    restart: unless-stopped
+    volumes:
+      - ./keys/validator.keys:/node/keys.json:ro
+      - ./genesis.json:/node/genesis.json:ro
+      - tl-single-data:/node/data
+    environment:
+      RUST_LOG: info
+      TRUTHLINKED_FORCE_TESTNET: "1"
+      TRUTHLINKED_SYNC_LENIENT: "1"
+      INGRESS_PORT: "18081"
+      RPC_PORT: "19941"
+      P2P_PORT: "19080"
+    ports:
+      - "18081:18081"
+      - "19941:19941"
+      - "19080:19080"
+    networks:
+      - truthlinked
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apt-get update -qq && apt-get install -y -qq ca-certificates curl > /dev/null 2>&1 || true
+        exec node \
+          --validator-keys /node/keys.json \
+          --data-dir /node/data \
+          --ingress-port ${INGRESS_PORT:-18081} \
+          --rpc-port ${RPC_PORT:-19941} \
+          --p2p-port ${P2P_PORT:-19080} \
+          --genesis-file /node/genesis.json \
+          --single-node \
+          >> /node/logs/single-node.log 2>&1
+
+volumes:
+  tl-single-data:
+
+networks:
+  truthlinked:
+    driver: bridge

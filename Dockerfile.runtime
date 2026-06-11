@@ -1,0 +1,5 @@
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
+COPY target/release/node /usr/local/bin/node
+ENV RUST_LOG=info
+ENTRYPOINT ["node"]

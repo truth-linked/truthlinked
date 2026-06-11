@@ -1,0 +1,41 @@
+[package]
+name = "axiom-cli"
+authors = ["TruthLinked Labs <Donatus@truthlinked.org>"]
+description = "TruthLinked command-line interface for accounts, cells, validators, governance, MCP, and SDK workflows."
+version = "0.1.4"
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+homepage = "https://truthlinked.org"
+repository = "https://github.com/truth-linked/truthlinked"
+documentation = "https://docs.rs/axiom-cli"
+keywords = ["truthlinked", "blockchain", "cli", "post-quantum", "mcp"]
+categories = ["command-line-utilities", "cryptography"]
+include = ["Cargo.toml", "README.md", "src/**/*.rs", "template/**/*"]
+
+[[bin]]
+name = "axiom"
+path = "src/main.rs"
+
+[dependencies]
+truthlinked-core = "0.1.3"
+truthlinked-state = "0.1.3"
+truthlinked-mcp = "0.1.2"
+truthlinked-axiom-compiler = "0.1.3"
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+tempfile = "3.8"
+hex = "0.4"
+blake3 = "1.5"
+postcard = { version = "1.1", features = ["alloc"] }
+fips204 = { version = "0.4", features = ["ml-dsa-65"] }
+rpassword = "7.3"
+dirs = "5.0"
+rand = "0.8"
+regex = "1.10"
+bip39 = "2.2.2"
+include_dir = "0.7"
+toml = "0.8"
+urlencoding = "2.1"

@@ -1,0 +1,32 @@
+cell price_feed {
+    error Unauthorized;
+    error PricePending;
+
+    storage owner: address;
+    storage last_price: u256;
+    storage last_request_id: u256;
+
+    init(initial_owner: address) {
+        owner = initial_owner;
+        last_price = 0;
+    }
+
+    pub fn request_price(url: u256, method: u256, body: u256) {
+        require caller == owner;
+        let req_id = accord::request(url, method, body);
+        last_request_id = req_id;
+        emit PriceRequested { req_id };
+    }
+
+    pub fn settle_price() {
+        let req_id = last_request_id;
+        let price = accord::read(req_id);
+        require price != 0;
+        last_price = price;
+        emit PriceSettled { price };
+    }
+
+    pub fn get_price() -> u256 {
+        return last_price;
+    }
+}

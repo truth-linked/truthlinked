@@ -1,0 +1,53 @@
+[package]
+name = "truthlinked-state"
+authors = ["TruthLinked Labs <Donatus@truthlinked.org>"]
+description = "State transition, account, cell, staking, oracle, MCP, and token logic for TruthLinked."
+version = "0.1.3"
+edition = "2021"
+license = "MIT"
+homepage = "https://truthlinked.org"
+repository = "https://github.com/truth-linked/truthlinked"
+documentation = "https://docs.rs/truthlinked-state"
+keywords = ["truthlinked", "blockchain", "state", "post-quantum", "cells"]
+categories = ["cryptography", "data-structures"]
+include = ["Cargo.toml", "src/**/*.rs"]
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+sha2 = "0.10"
+postcard = { version = "1.1", features = ["alloc"] }
+bytes = "1.11.1"
+uuid = { version = "1.0", features = ["v4"] }
+rand = "0.8"
+hex = "0.4"
+hex-literal = "0.4"
+async-trait = "0.1"
+anyhow = "1.0"
+dashmap = "5.5"
+lazy_static = "1.4"
+crossbeam = "0.8"
+thiserror = "1.0"
+rayon = "1.11"
+im = "15"
+blake3 = "1.5"
+fips204 = "0.4.6"
+fips203 = "0.4.3"
+argon2 = "0.5.3"
+aes-gcm = "0.10.3"
+pbkdf2 = "0.12.2"
+hkdf = "0.12.4"
+bip39 = "2.2.2"
+rpassword = "7.4.0"
+keyring = "2.3.3"
+
+truthlinked-core = "0.1.3"
+truthlinked-governance = "0.1.2"
+truthlinked-runtime = "0.1.2"
+truthlinked-oracle = "0.1.2"
+truthlinked-mcp = "0.1.2"
+truthlinked-staking = "0.1.2"
+truthlinked-axiom = "0.1.3"

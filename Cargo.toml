@@ -1,0 +1,89 @@
+[package]
+name = "truthlinked"
+authors = ["TruthLinked Labs <Donatus@truthlinked.org>"]
+description = "TruthLinked blockchain node — built by Truthlinked Labs."
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["crates/truthlinked-axiom", "crates/truthlinked-axiom-sdk", "crates/truthlinked-axiom-macro", "crates/truthlinked-axiom-compiler", "crates/axiom-cli", "crates/truthlinked-core", "crates/truthlinked-governance", "crates/truthlinked-staking", "crates/truthlinked-oracle", "crates/truthlinked-runtime", "crates/truthlinked-mcp", "crates/truthlinked-consensus", "crates/truthlinked-net", "trth-keygen", "donadb", "donadb-rel", "explorer-indexer"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[dependencies]
+truthlinked-core = "0.1.3"
+truthlinked-governance = "0.1.2"
+truthlinked-staking = "0.1.2"
+truthlinked-oracle = "0.1.2"
+truthlinked-runtime = "0.1.2"
+truthlinked-mcp = "0.1.2"
+truthlinked-state = "0.1.3"
+truthlinked-consensus = "0.1.2"
+truthlinked-net = "0.1.2"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+sha2 = "0.10"
+postcard = { version = "1.1", features = ["alloc"] }
+bytes = "1.11.1"
+uuid = { version = "1.0", features = ["v4"] }
+rand = "0.8"
+hex = "0.4"
+hex-literal = "0.4"
+async-trait = "0.1"
+anyhow = "1.0"
+dashmap = "5.5"
+lazy_static = "1.4"
+crossbeam = "0.8"
+thiserror = "1.0"
+warp = "0.3"
+fips204 = { version = "0.4", features = ["ml-dsa-65"] }
+fips203 = "0.4"
+aes-gcm = "0.10"
+rand_chacha = "0.3"
+rand_core = "0.6"
+rayon = "1.10"
+schnorrkel = "0.11"
+merlin = "3.0"
+arc-swap = "1.7"
+blake2 = "0.10"
+blake3 = "1.5"
+clap = { version = "4.5", features = ["derive"] }
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+dirs = "5.0"
+futures = "0.3"
+async-stream = "0.3"
+pbkdf2 = { version = "0.12", features = ["simple"] }
+hmac = "0.12"
+hkdf = "0.12"
+argon2 = "0.5"
+bincode = "1.3"
+
+
+bip39 = "2.2.2"
+axum = { version = "0.8.8", features = ["ws", "macros"] }
+tokio-util = "0.7.18"
+core_affinity = "0.8"
+tower = "0.5.3"
+tower-http = { version = "0.6.8", features = ["cors"] }
+parking_lot = "0.12.5"
+lru = "0.16.3"
+rpassword = "7.3"
+im = { version = "15.1.0", features = ["serde"] }
+prometheus = "0.13"
+chrono = "0.4"
+
+# WebSocket for streaming consensus
+libc = "0.2"
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+
+tokio-stream = { version = "0.1", features = ["sync"] }
+once_cell = "1.20"
+[dev-dependencies]
+tempfile = "3.8"

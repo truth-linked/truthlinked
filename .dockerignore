@@ -1,0 +1,70 @@
+# Rust build artifacts (huge, rebuilt inside container anyway)
+target/
+**/target/
+**/*.rs.bk
+**/*.pdb
+donadb-rel/
+
+# Runtime node data, logs, pids (never ship these)
+data*/
+logs/
+*.pid
+*.log
+node-restart-*.log
+node-validator*.log
+tmp/
+
+# Keys and secrets — critical for public repo
+keys/
+*.keys
+*.keys.json
+validator*_keys.json
+user*_keys.json
+test-wallets/
+community_keys.json
+treasury_keys.json
+validators_fund_keys.json
+strategic_keys.json
+airdrop.json
+*.keys.json
+
+# Test / dev artifacts
+test-wallets/
+tmp_cli_test/
+axiom-acceptance/
+indexer-data/
+explorer/
+explorer-indexer/
+build-cache/
+cells/          # example cells; users can generate their own
+fuzz/artifacts/
+fuzz/corpus/
+fuzz/target/
+
+# Python / node / frontend
+__pycache__/
+*.py[cod]
+node_modules/
+explorer/node_modules/
+
+# Temp, backups, patches, local
+*.bak
+*~
+.cleanup-archive/
+*.patch_*.py
+.patch_live_quorum.py
+.patch_snapshot_fallback.py
+*.tar.gz
+
+# Git noise (inner sub-git dirs cause warnings/bloat on build context)
+**/.git/
+.git/
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+
+# Docker itself
+.docker/
+docker-compose*.yml

@@ -1,0 +1,53 @@
+# Rust build
+target/
+**/*.rs.bk
+**/*.pdb
+
+# Runtime / node data
+data*/
+logs/
+*.pid
+*.log
+node-restart-*.log
+node-validator*.log
+*.tar.gz
+
+# Python / explorer
+__pycache__/
+*.py[cod]
+node_modules/
+explorer/node_modules/
+
+# Local test artifacts and keys (sensitive)
+test-wallets/
+validator*_keys.json
+user*_keys.json
+*.keys
+tmp_cli_test/
+indexer-data/
+
+# Temp / backup / patch
+*.bak
+*~
+.cleanup-archive/
+*.patch_*.py
+.patch_live_quorum.py
+.patch_snapshot_fallback.py
+
+# Other generated
+donadb-rel/
+
+# Docker build context & secrets (in addition to .dockerignore)
+.docker/
+docker-compose.override.yml
+keys/
+genesis.json          # user copy; the originals genesis_bootnode.json + genesis_validator.json stay committed as examples
+
+# Extra safety for keys that might be generated in root during dev
+default.keys
+*.keys.json
+
+# Large or noisy things that should never be in the public source tree
+build/
+dist/
+*.swp

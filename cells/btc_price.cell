@@ -1,0 +1,50 @@
+cell btc_price {
+    error Unauthorized;
+    error NoPriceYet;
+
+    storage owner: address;
+    storage last_price: u256;
+    storage last_request_id: u256;
+    storage last_updated: u64;
+
+    init(initial_owner: address) {
+        owner = initial_owner;
+        last_price = 0;
+        last_request_id = 0;
+        last_updated = 0;
+    }
+
+    /// Request a fresh BTC/USD price from Coinbase.
+    /// Returns the request ID — call settle() once validators fetch it.
+    pub fn request() -> u256 {
+        require caller == owner;
+        let req_id = accord::request(
+            "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+            "GET",
+            ""
+        );
+        last_request_id = req_id;
+        emit PriceRequested { req_id };
+        return req_id;
+    }
+
+    /// Settle the pending request and store the price.
+    pub fn settle() {
+        let req_id = last_request_id;
+        let price = accord::read(req_id);
+        require price != 0;
+        last_price = price;
+        let h = height;
+        last_updated = h;
+        emit PriceSettled { price, h };
+    }
+
+    pub fn get_price() -> u256 {
+        require last_price != 0;
+        return last_price;
+    }
+
+    pub fn get_last_updated() -> u64 {
+        return last_updated;
+    }
+}

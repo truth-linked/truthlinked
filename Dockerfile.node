@@ -1,0 +1,58 @@
+# TruthLinked Node — multi-stage Docker build
+# Usage:
+#   docker build -t truthlinked-node .
+#   docker run -d \
+#     -v /path/to/keys.json:/node/keys.json:ro \
+#     -v /path/to/genesis.json:/node/genesis.json:ro \
+#     -v truthlinked-data:/node/data \
+#     -p 18080:18080 -p 19944:19944 \
+#     -e BOOTNODES="ip:19080:pubkey" \
+#     truthlinked-node
+
+# ── Build stage ───────────────────────────────────────────────────────────────
+FROM rust:1.82-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY . .
+
+RUN cargo build --release --bin node
+
+# ── Runtime stage ─────────────────────────────────────────────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /node
+
+COPY --from=builder /build/target/release/node /usr/local/bin/node
+COPY --from=builder /build/sdk /node/sdk
+COPY --from=builder /build/keys /node/keys
+
+# Ports: ingress | P2P | RPC
+EXPOSE 18080 19080 19944
+
+ENV RUST_LOG=info
+ENV TRUTHLINKED_FORCE_TESTNET=1
+
+# Required mounts:
+#   /node/keys.json   — validator keypair
+#   /node/genesis.json — genesis config
+#   /node/data        — chain data (persistent volume)
+#
+# Required env:
+#   BOOTNODES — comma-separated "ip:port:pubkey" of bootstrap nodes
+
+ENTRYPOINT ["sh", "-c", "\
+  exec node \
+    --validator-keys /node/keys.json \
+    --data-dir /node/data \
+    --ingress-port ${INGRESS_PORT:-18080} \
+    --p2p-port ${P2P_PORT:-19080} \
+    --rpc-port ${RPC_PORT:-19944} \
+    --genesis-file /node/genesis.json \
+    ${BOOTNODES:+--bootnodes $BOOTNODES} \
+"]
