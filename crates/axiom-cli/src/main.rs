@@ -4241,7 +4241,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 "account_id": hex::encode(&sender_account_id),
                 "pubkey": hex::encode(&sender_pubkey),
                 "amount": amount_raw.to_string(),
-                "amount_trth": amount,
+                "chain_id": hex::encode(genesis_hash),
                 "timestamp": timestamp,
                 "nonce": nonce,
                 "genesis_fingerprint": genesis_hash_hex,
