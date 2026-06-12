@@ -1,171 +1,87 @@
-# Axiom CLI v0.1.4
+# Axiom CLI v0.1.5
 
-Command-line interface for TruthLinked accounts, value transfer (native, NFT, token), chain queries, key management, staking, governance, and SDK workflows.
+Command-line interface for TruthLinked accounts, value transfers (native, NFT, token), chain queries, key management, staking, governance, and SDK workflows.
 
-It signs transactions (postcard + post-quantum signatures) and submits them to the chain RPC.
+It signs transactions using postcard encoding and post-quantum signatures before submitting them to the chain RPC.
 
-## Build / install
+## Build and Install
+
+From the repository root:
 
 ```bash
-git clone https://github.com/truth-linked/truthlinked.git
-cd truthlinked
 cargo build --release -p axiom-cli
-# binary lands at target/release/axiom
+# binary is at target/release/axiom
 ```
 
-Or install directly:
+## Configuration
+
+Global options are available on every command:
 
 ```bash
-cargo install --path crates/axiom-cli
+axiom --rpc <url> <command>
+axiom --config <path> <command>
 ```
 
-## Keys and defaults
+Environment overrides:
+- `TRUTHLINKED_RPC=<url>`
+- `TRUTHLINKED_EXPLORER=<url>`
 
-Create a signing key (writes `~/.truthlinked/default.keys` and a `config.json`):
+## Keys and Accounts
 
 ```bash
-axiom account-create
-axiom account-create --encrypt
+axiom keygen --output ~/.truthlinked/default.keys
+axiom account-id --from ~/.truthlinked/default.keys
 ```
 
-The CLI resolves the default key from `~/.truthlinked/config.json` (`default_keyfile` or `keypair`).
-
-Override for any command:
+## Balances and Status
 
 ```bash
-axiom ... --from /path/to/some.keys
-axiom ... --from ./my-config.json   # if the file is a config pointing at a key
+axiom balance <account_id_or_pubkey_hex>
+axiom status --from ~/.truthlinked/default.keys
 ```
 
-## Network / RPC
+## Transfers
+
+Supports account IDs, public keys, and .tl names.
 
 ```bash
-axiom chain-info
-axiom --rpc http://localhost:19941 chain-info
-axiom --network devnet ...
+axiom transfer --from <keyfile> --to <recipient> --amount <value>
+# Examples
+axiom transfer --to alice.tl --amount 10
+axiom transfer --to <account_id> --amount 10.5
 ```
 
-## Output
+## Axiom Cells
 
 ```bash
-axiom --output json chain-info
-axiom --output json balance-by-pubkey <pubkey>
+axiom compile ./counter.cell
+axiom deploy --from <keyfile> --bytecode ./counter.axiom --manifest ./counter.manifest.json
+axiom call --from <keyfile> --cell <cell_id> --method <method> --args <hex_args>
+axiom upgrade --from <keyfile> --cell <cell_id> --bytecode <new_bytecode> --manifest <new_manifest>
 ```
 
-## Sending (fresh paths only)
-
-All value movement uses `axiom send <subcommand>`.
-
-### Native token
+## Compute Escrow
 
 ```bash
-axiom send value <recipient> <amount> [--from <keyfile>]
-# aliases
-axiom send native <recipient> <amount> [--from <keyfile>]
-axiom send tlkd <recipient> <amount> [--from <keyfile>]
+axiom deposit-compute --from <keyfile> --amount <amount>
+axiom withdraw-compute --from <keyfile> --amount <amount>
 ```
 
-`recipient`:
-- name ending `.tl`
-- 64-hex account ID
-- 3904-hex full Dilithium public key
-
-`amount` accepts decimals and suffixes (e.g. `1.5`, `1000`, `2k`).
-
-Examples:
+## Validators
 
 ```bash
-axiom send value alice.tl 10
-axiom send value 64hexaccountid 5 --from ~/.truthlinked/default.keys
-axiom send value 19ad04...3904hexpubkey 0.001 --from /path/to/key
+axiom validator stake --from <keyfile> --amount <amount>
+axiom validator unstake --from <keyfile> --amount <amount>
+axiom validator withdraw --from <keyfile>
+axiom validator unjail --from <keyfile>
+axiom validator info --from <keyfile>
 ```
 
-### NFT
+## Faucet
 
 ```bash
-axiom send nft <nft-id-32hex> <recipient> [--price <amount>] [--from <keyfile>]
+axiom faucet --from <keyfile>
 ```
-
-### Token (fungible from a token cell)
-
-```bash
-axiom send token <token-cell-32hex> <recipient> <amount> [--from <keyfile>]
-```
-
-## Common queries
-
-```bash
-axiom chain-info
-axiom token-info
-axiom status
-axiom balance <account-id-hex>
-axiom balance-by-pubkey <pubkey-hex> [--full]
-axiom resolve <name-or-hex>
-axiom tx-status <tx-hash>
-axiom account-id [--from <key>] [--pubkey <hex>]
-```
-
-## Faucet (devnet)
-
-```bash
-axiom faucet --amount 10000
-axiom faucet --amount 10000 --from <key>
-```
-
-## Validator / staking operations
-
-Use the validator keyfile for owner actions:
-
-```bash
-axiom bond --from <validator.keys> --amount 100
-axiom unbond --from <validator.keys> --amount 10
-axiom withdraw --from <validator.keys>
-axiom unjail --from <validator.keys>
-```
-
-Delegation (delegate key vs owner key):
-
-```bash
-axiom delegate-add --from <owner.keys> --delegate-pubkey <hex>
-axiom stake-for --from <delegate.keys> --owner-pubkey <ownerhex> --amount 10
-axiom unstake-for ...
-axiom withdraw-for ...
-axiom unjail-for ...
-```
-
-## Transaction lifecycle
-
-Submit returns a hash. Inspect settlement:
-
-```bash
-axiom tx-status <hash>
-```
-
-## Configuration files
-
-A plain path to a `.keys` file or a JSON config file (with `default_keyfile`) can be passed to `--from`.
-
-## Docker single-node example
-
-See the root `docker-compose.yml` and `Dockerfile.node`.
-
-Typical flow after key generation on the host:
-
-```bash
-mkdir -p keys
-cp ~/.truthlinked/default.keys keys/validator.keys
-cp genesis_bootnode.json genesis.json
-docker compose up -d
-```
-
-The compose is intentionally generic (user supplies the key produced by `axiom account-create`).
-
-## Notes
-
-- Recipient public keys for transfers are passed and stored in their full 1952-byte (3904-hex) form when you supply the long key.
-- The CLI never uses the legacy flat `transfer` / `mint-nft` etc. commands; everything goes through the `send` subcommands.
-- All signing uses the Dilithium material from the key file.
 
 Repository: https://github.com/truth-linked/truthlinked
-CLI crate: crates/axiom-cli
-CLI version: 0.1.4
+CLI version: 0.1.5
