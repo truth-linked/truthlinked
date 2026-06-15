@@ -4254,8 +4254,9 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     .or_insert_with(|| serde_json::json!(hex::encode(&sender_account_id)));
                 map.entry("amount".to_string())
                     .or_insert_with(|| serde_json::json!(amount_raw.to_string()));
+                let tlkd_display = { let w = amount_raw / truthlinked_core::constants::ONE_TLKD; let f = amount_raw % truthlinked_core::constants::ONE_TLKD; if f == 0 { format!("{} TLKD", w) } else { let s = format!("{:09}", f); format!("{}.{} TLKD", w, s.trim_end_matches("0")) } };
                 map.entry("amount_tlkd".to_string())
-                    .or_insert_with(|| serde_json::json!(truthlinked_state::token::format_amount(amount_raw)));
+                    .or_insert_with(|| serde_json::json!(tlkd_display));
             }
             print_output(&parsed, output)?;
         }
