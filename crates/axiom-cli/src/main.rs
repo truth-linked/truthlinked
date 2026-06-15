@@ -4145,6 +4145,15 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
 
+            // Guard: never silently overwrite an existing keyfile
+            if std::path::Path::new(&output_path).exists() {
+                eprint!("⚠ Key file already exists at {}. Overwrite? [y/N]: ", output_path);
+                let mut ans = String::new();
+                std::io::stdin().read_line(&mut ans)?;
+                if ans.trim().to_lowercase() != "y" {
+                    return Err(format!("Aborted — existing key file preserved: {}", output_path).into());
+                }
+            }
             keypair.save_with_password(&output_path, password.as_deref())?;
 
             let pubkey = keypair.dilithium_pk.clone().into_bytes();
