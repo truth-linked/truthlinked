@@ -14,7 +14,7 @@ use sha2::{Digest, Sha256};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
-use truthlinked_core::constants::{ONE_TRTH, TX_SIGN_CONTEXT};
+use truthlinked_core::constants::{ONE_TLKD, TX_SIGN_CONTEXT};
 use truthlinked_core::pq_execution::{
     governance_system_cell_id, name_registry_system_cell_id, oracle_governance_system_cell_id,
     staking_system_cell_id, token_governance_system_cell_id, treasury_system_cell_id,
@@ -191,8 +191,8 @@ pub struct State {
     pub cells: truthlinked_runtime::cells::CellState, // Isolated cell state
     pub accumulated_gas_fees: u128, // Gas fees collected since last distribution (stake-weighted)
     pub accumulated_name_fees: u128, // Name registration fees (equal distribution)
-    pub accumulated_compute_fees_trth: u128, // TLKD collected from compute escrow (CU-metered)
-    pub accumulated_treasury_fees: u128, // TRTH protocol receipts (non-CU; currently unused)
+    pub accumulated_compute_fees_tlkd: u128, // TLKD collected from compute escrow (CU-metered)
+    pub accumulated_treasury_fees: u128, // TLKD protocol receipts (non-CU; currently unused)
     pub executed_tx_hashes: std::collections::HashSet<[u8; 32]>, // Replay protection
     pub params: ImHashMap<[u8; 32], [u8; 32]>, // On-chain governance parameters
     pub name_registry: ImHashMap<String, NameRegistration>, // name -> registration info
@@ -337,17 +337,17 @@ impl State {
         self.verify_transaction_signature(tx, sender_account)?;
         Ok(())
     }
-    fn cu_fee_to_trth(cu_fee: u128) -> Result<u128, String> {
-        let cu_per_trth = gp::get_u64(gp::PARAM_CU_PER_TRTH) as u128;
-        if cu_per_trth == 0 {
-            return Err("cu_per_trth is zero".to_string());
+    fn cu_fee_to_tlkd(cu_fee: u128) -> Result<u128, String> {
+        let cu_per_tlkd = gp::get_u64(gp::PARAM_CU_PER_TLKD) as u128;
+        if cu_per_tlkd == 0 {
+            return Err("cu_per_tlkd is zero".to_string());
         }
-        // Convert CU cost into TRTH base units, rounding up.
+        // Convert CU cost into TLKD base units, rounding up.
         Ok(cu_fee
-            .checked_mul(ONE_TRTH)
+            .checked_mul(ONE_TLKD)
             .ok_or("CU fee overflow")?
-            .saturating_add(cu_per_trth - 1)
-            / cu_per_trth)
+            .saturating_add(cu_per_tlkd - 1)
+            / cu_per_tlkd)
     }
 
     fn staking_namespace_positions() -> [u8; 32] {
@@ -457,7 +457,7 @@ impl State {
             cells: truthlinked_runtime::cells::CellState::new(),
             accumulated_gas_fees: 0,
             accumulated_name_fees: 0,
-            accumulated_compute_fees_trth: 0,
+            accumulated_compute_fees_tlkd: 0,
             accumulated_treasury_fees: 0,
             executed_tx_hashes: std::collections::HashSet::new(),
             params: ImHashMap::new(),
@@ -618,7 +618,7 @@ impl State {
             TransactionIntent::BurnNFT { .. } => (0, gp::get_u64(gp::PARAM_GAS_BURN_NFT)),
             TransactionIntent::ApproveNFT { .. } => (0, gp::get_u64(gp::PARAM_GAS_APPROVE_NFT)),
             TransactionIntent::RotateKey { .. } => (0, gp::get_u64(gp::PARAM_GAS_ROTATE_KEY)),
-            TransactionIntent::WrapTRTH { .. } | TransactionIntent::UnwrapTRTH { .. } => {
+            TransactionIntent::WrapTLKD { .. } | TransactionIntent::UnwrapTLKD { .. } => {
                 (0, gp::get_u64(gp::PARAM_GAS_TRANSFER))
             }
             TransactionIntent::DepositCompute { .. } => (0, gp::get_u64(gp::PARAM_GAS_TRANSFER)),
@@ -738,10 +738,10 @@ impl State {
             TransactionIntent::RotateKey { new_pubkey } => {
                 self.compute_rotate_key_diff(&mut diff, tx.sender, new_pubkey, sender_account)?;
             }
-            TransactionIntent::WrapTRTH { amount } => {
+            TransactionIntent::WrapTLKD { amount } => {
                 self.compute_wrap_trth_diff(&mut diff, tx.sender, *amount, sender_account)?;
             }
-            TransactionIntent::UnwrapTRTH { amount } => {
+            TransactionIntent::UnwrapTLKD { amount } => {
                 self.compute_unwrap_trth_diff(&mut diff, tx.sender, *amount, sender_account)?;
             }
             TransactionIntent::DepositCompute { amount } => {
@@ -1502,7 +1502,7 @@ impl State {
             }
         }
 
-        // Debit compute escrow (TRTH) for CU-metered fees.
+        // Debit compute escrow (TLKD) for CU-metered fees.
         if diff.cu_fee > 0 {
             let escrow_credits: u128 = diff
                 .compute_escrow_credits
@@ -1516,19 +1516,19 @@ impl State {
                 .filter(|(id, _)| *id == tx.sender)
                 .map(|(_, amt)| *amt)
                 .sum();
-            let escrow_base = sender_account.compute_escrow_trth;
+            let escrow_base = sender_account.compute_escrow_tlkd;
             let escrow_after = escrow_base
                 .checked_add(escrow_credits)
                 .ok_or("Escrow overflow")?
                 .checked_sub(escrow_debits)
                 .ok_or("Escrow underflow")?;
 
-            let trth_fee = Self::cu_fee_to_trth(diff.cu_fee)?;
+            let trth_fee = Self::cu_fee_to_tlkd(diff.cu_fee)?;
             if escrow_after < trth_fee {
                 return Err("Insufficient compute escrow".to_string());
             }
             diff.compute_escrow_debits.push((tx.sender, trth_fee));
-            diff.compute_fee_trth = trth_fee;
+            diff.compute_fee_tlkd = trth_fee;
         }
 
         // Always store sender pubkey in diff (airdrop accounts start with empty pubkey_bytes)
@@ -1588,7 +1588,7 @@ impl State {
             let new_account = AccountRecord {
                 pubkey_bytes: recipient_pubkey.to_vec(),
                 balance: 0,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             };
@@ -1678,7 +1678,7 @@ impl State {
                 let new_account = AccountRecord {
                     pubkey_bytes: transfer.recipient_pubkey.clone().unwrap_or_default(),
                     balance: 0,
-                    compute_escrow_trth: 0,
+                    compute_escrow_tlkd: 0,
                     nonce: 0,
                     nfts: vec![],
                 };
@@ -1760,8 +1760,8 @@ impl State {
         if amount > max_airdrop_amount {
             return Err(format!(
                 "Airdrop amount exceeds maximum of {} TLKD (requested: {} TLKD)",
-                max_airdrop_amount / ONE_TRTH,
-                amount / ONE_TRTH
+                max_airdrop_amount / ONE_TLKD,
+                amount / ONE_TLKD
             ));
         }
 
@@ -1805,7 +1805,7 @@ impl State {
             let new_account = AccountRecord {
                 pubkey_bytes: recipient_pubkey.to_vec(),
                 balance: amount,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             };
@@ -1877,7 +1877,7 @@ impl State {
         if amount == 0 {
             return Err("Withdraw amount must be > 0".to_string());
         }
-        let escrow = sender_account.compute_escrow_trth;
+        let escrow = sender_account.compute_escrow_tlkd;
         if escrow < amount {
             return Err("Insufficient compute escrow balance".to_string());
         }
@@ -1898,7 +1898,7 @@ impl State {
         if sender_account.balance < amount {
             return Err("Insufficient TLKD balance to wrap".into());
         }
-        // Debit TLKD, credit wTRTH token balance
+        // Debit TLKD, credit wTLKD token balance
         diff.native_debits.push((sender, amount));
         diff.token_credits
             .push((wtrth_system_cell_id(), sender, amount));
@@ -1915,7 +1915,7 @@ impl State {
         if amount == 0 {
             return Err("Unwrap amount must be > 0".into());
         }
-        // Burn wTRTH, credit TLKD
+        // Burn wTLKD, credit TLKD
         let wtrth_bal = self
             .cells
             .token_balances
@@ -1951,14 +1951,14 @@ impl State {
             // Accumulate gas fees (native TLKD)
             self.accumulated_gas_fees += diff.gas_fee;
             // Accumulate compute fees (TLKD collected from escrow)
-            self.accumulated_compute_fees_trth += diff.compute_fee_trth;
+            self.accumulated_compute_fees_tlkd += diff.compute_fee_tlkd;
             // Accumulate treasury fees (direct protocol receipts)
             self.accumulated_treasury_fees += diff.treasury_fee;
             // Track fees for emission subsidy calculation
             self.accumulated_epoch_fees = self
                 .accumulated_epoch_fees
                 .saturating_add(diff.gas_fee)
-                .saturating_add(diff.compute_fee_trth)
+                .saturating_add(diff.compute_fee_tlkd)
                 .saturating_add(diff.treasury_fee);
         }
 
@@ -1970,7 +1970,7 @@ impl State {
                     .or_insert_with(|| AccountRecord {
                         pubkey_bytes: vec![], // Will be set by account_updates
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     });
@@ -1998,12 +1998,12 @@ impl State {
                     .or_insert_with(|| AccountRecord {
                         pubkey_bytes: vec![],
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     });
-            recipient_account.compute_escrow_trth = recipient_account
-                .compute_escrow_trth
+            recipient_account.compute_escrow_tlkd = recipient_account
+                .compute_escrow_tlkd
                 .checked_add(amount)
                 .ok_or("Recipient escrow overflow")?;
         }
@@ -2013,8 +2013,8 @@ impl State {
                 .accounts
                 .get_mut(&sender)
                 .ok_or("Sender account not found")?;
-            sender_account.compute_escrow_trth = sender_account
-                .compute_escrow_trth
+            sender_account.compute_escrow_tlkd = sender_account
+                .compute_escrow_tlkd
                 .checked_sub(amount)
                 .ok_or("Sender escrow underflow")?;
         }
@@ -2028,7 +2028,7 @@ impl State {
                 }
                 // Always update nfts
                 existing.nfts = record.nfts;
-                // Do not touch balance or compute_escrow_trth - they were already set by transfers
+                // Do not touch balance or compute_escrow_tlkd - they were already set by transfers
             } else {
                 // New account - insert it (shouldn't happen if native_transfers ran first)
                 self.accounts.insert(id, record);
@@ -2300,11 +2300,11 @@ impl State {
                 .saturating_sub(diff.name_fee_spent);
         }
         if diff.compute_fee_spent > 0 {
-            if diff.compute_fee_spent > self.accumulated_compute_fees_trth {
+            if diff.compute_fee_spent > self.accumulated_compute_fees_tlkd {
                 return Err("Compute fee distribution exceeds accumulated fees".to_string());
             }
-            self.accumulated_compute_fees_trth = self
-                .accumulated_compute_fees_trth
+            self.accumulated_compute_fees_tlkd = self
+                .accumulated_compute_fees_tlkd
                 .saturating_sub(diff.compute_fee_spent);
         }
         if diff.treasury_fee_spent > 0 {
@@ -2483,7 +2483,7 @@ impl State {
                 .or_insert_with(|| AccountRecord {
                     pubkey_bytes: pk.clone(),
                     balance: 0,
-                    compute_escrow_trth: 0,
+                    compute_escrow_tlkd: 0,
                     nonce: 0,
                     nfts: vec![],
                 });
@@ -2833,6 +2833,18 @@ impl State {
         self.prune_expired_oracle_results(current_height);
         self.prune_state_collections(current_height);
 
+        // Distribute accumulated gas fees to validators every block.
+        if self.accumulated_gas_fees > 0 {
+            match self.compute_gas_fee_distribution_diff() {
+                Ok(diff) => {
+                    if let Err(e) = self.apply_diff(diff) {
+                        tracing::warn!("Gas fee distribution failed: {}", e);
+                    }
+                }
+                Err(e) => tracing::warn!("Gas fee distribution diff error: {}", e),
+            }
+        }
+
         // Epoch boundary: pay treasury emission if fees do not cover it.
         use crate::constants::EMISSION_EPOCH_BLOCKS;
         if current_height > 0 && current_height % EMISSION_EPOCH_BLOCKS == 0 {
@@ -2844,18 +2856,18 @@ impl State {
     pub fn compute_epoch_emission(&self, current_height: u64) -> u128 {
         use crate::constants::{
             BLOCKS_PER_YEAR, EMISSION_DECAY_BPS_PER_YEAR, EMISSION_EPOCH_BLOCKS,
-            EMISSION_YEAR1_TRTH,
+            EMISSION_YEAR1_TLKD,
         };
-        use truthlinked_core::constants::ONE_TRTH;
+        use truthlinked_core::constants::ONE_TLKD;
 
         let epoch_number = current_height / EMISSION_EPOCH_BLOCKS;
         let year_number = (epoch_number * EMISSION_EPOCH_BLOCKS / BLOCKS_PER_YEAR) as u32;
 
-        // year_emission = EMISSION_YEAR1_TRTH * ONE_TRTH * (10000 - decay)^year / 10000^year
+        // year_emission = EMISSION_YEAR1_TLKD * ONE_TLKD * (10000 - decay)^year / 10000^year
         let base: u128 = (10_000 - EMISSION_DECAY_BPS_PER_YEAR as u128).pow(year_number);
         let denom: u128 = 10_000u128.pow(year_number);
-        let year_emission = EMISSION_YEAR1_TRTH
-            .saturating_mul(ONE_TRTH)
+        let year_emission = EMISSION_YEAR1_TLKD
+            .saturating_mul(ONE_TLKD)
             .saturating_mul(base)
             / denom;
 
@@ -2935,7 +2947,7 @@ impl State {
                     .or_insert_with(|| AccountRecord {
                         pubkey_bytes: pk.clone(),
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     });
@@ -3154,7 +3166,7 @@ mod tests {
         let rec = AccountRecord {
             pubkey_bytes: pk.clone(),
             balance,
-            compute_escrow_trth: 0,
+            compute_escrow_tlkd: 0,
             nonce: 0,
             nfts: vec![],
         };
@@ -3331,7 +3343,7 @@ mod tests {
             TransactionIntent::Claim {
                 recipient: id,
                 recipient_pubkey: Some(pk.clone()),
-                amount: 10 * ONE_TRTH,
+                amount: 10 * ONE_TLKD,
             },
         );
 
@@ -3341,7 +3353,7 @@ mod tests {
         state.apply_diff(diff).expect("apply diff");
 
         let account = state.accounts.get(&id).expect("account created");
-        assert_eq!(account.balance, 10 * ONE_TRTH);
+        assert_eq!(account.balance, 10 * ONE_TLKD);
         assert_eq!(state.accumulated_gas_fees, 0);
     }
 
@@ -3462,7 +3474,7 @@ mod tests {
         let (recipient_id, recipient_rec, _recipient_pk) = make_account(5, 0);
         let (fee_id, fee_rec, _fee_pk) = make_account(6, 0);
 
-        sender_rec.compute_escrow_trth = 10 * ONE_TRTH;
+        sender_rec.compute_escrow_tlkd = 10 * ONE_TLKD;
         state.accounts.insert(sender_id, sender_rec);
         state.accounts.insert(recipient_id, recipient_rec);
         state.accounts.insert(fee_id, fee_rec);
@@ -3560,8 +3572,8 @@ mod tests {
 
         let (owner_id, mut owner_rec, _owner_pk) = make_account(9, 10_000);
         let (recipient_id, mut recipient_rec, _recipient_pk) = make_account(10, 10_000);
-        owner_rec.compute_escrow_trth = 10 * ONE_TRTH;
-        recipient_rec.compute_escrow_trth = 10 * ONE_TRTH;
+        owner_rec.compute_escrow_tlkd = 10 * ONE_TLKD;
+        recipient_rec.compute_escrow_tlkd = 10 * ONE_TLKD;
         state.accounts.insert(owner_id, owner_rec);
         state.accounts.insert(recipient_id, recipient_rec);
 
@@ -3903,7 +3915,7 @@ mod tests {
         });
         let value_slot = State::staking_map_value_slot(&holder_id);
         let mut value = [0u8; 32];
-        value[0..16].copy_from_slice(&(ONE_TRTH as u128).to_le_bytes()); // amount
+        value[0..16].copy_from_slice(&(ONE_TLKD as u128).to_le_bytes()); // amount
         value[24..32].copy_from_slice(
             &(state.staking.current_height + crate::constants::STAKED_TRTH_MAX_LOCK_BLOCKS)
                 .to_le_bytes(),
@@ -3924,35 +3936,35 @@ mod tests {
 
         // Treasury system cell with balance for treasury revenue.
         let treasury_cell =
-            make_system_cell(treasury_system_cell_id(), 20 * ONE_TRTH, HashMap::new());
+            make_system_cell(treasury_system_cell_id(), 20 * ONE_TLKD, HashMap::new());
         state
             .cells
             .cells
             .insert(treasury_system_cell_id(), treasury_cell);
 
         // Accumulated revenues (large enough to avoid rounding to zero).
-        state.accumulated_gas_fees = 10 * ONE_TRTH;
-        state.accumulated_name_fees = 10 * ONE_TRTH;
-        state.accumulated_treasury_fees = 10 * ONE_TRTH;
-        state.accumulated_compute_fees_trth = 10 * ONE_TRTH;
+        state.accumulated_gas_fees = 10 * ONE_TLKD;
+        state.accumulated_name_fees = 10 * ONE_TLKD;
+        state.accumulated_treasury_fees = 10 * ONE_TLKD;
+        state.accumulated_compute_fees_tlkd = 10 * ONE_TLKD;
         let protocol_revenue = state
             .accumulated_gas_fees
             .saturating_add(state.accumulated_name_fees)
-            .saturating_add(state.accumulated_compute_fees_trth);
-        assert_eq!(protocol_revenue, 30 * ONE_TRTH);
+            .saturating_add(state.accumulated_compute_fees_tlkd);
+        assert_eq!(protocol_revenue, 30 * ONE_TLKD);
 
         let diff = state.compute_treasury_distribution_diff().unwrap();
 
         let validator_total: u128 = diff.staking_rewards.iter().map(|(_, amt)| *amt).sum();
         let staking_total: u128 = diff.native_transfers.iter().map(|(_, amt)| *amt).sum();
 
-        assert_eq!(validator_total, 24 * ONE_TRTH);
-        assert_eq!(staking_total, 8 * ONE_TRTH);
-        assert_eq!(diff.fee_burned, 8 * ONE_TRTH);
-        assert_eq!(diff.treasury_fee_spent, 10 * ONE_TRTH);
-        assert_eq!(diff.gas_fee_spent, 10 * ONE_TRTH);
-        assert_eq!(diff.name_fee_spent, 10 * ONE_TRTH);
-        assert_eq!(diff.compute_fee_spent, 10 * ONE_TRTH);
+        assert_eq!(validator_total, 24 * ONE_TLKD);
+        assert_eq!(staking_total, 8 * ONE_TLKD);
+        assert_eq!(diff.fee_burned, 8 * ONE_TLKD);
+        assert_eq!(diff.treasury_fee_spent, 10 * ONE_TLKD);
+        assert_eq!(diff.gas_fee_spent, 10 * ONE_TLKD);
+        assert_eq!(diff.name_fee_spent, 10 * ONE_TLKD);
+        assert_eq!(diff.compute_fee_spent, 10 * ONE_TLKD);
 
         let active_stake_before: u128 = state
             .staking
@@ -3967,31 +3979,31 @@ mod tests {
             .values()
             .map(|v| v.active_stake as u128)
             .sum();
-        assert_eq!(active_stake_after, active_stake_before + 24 * ONE_TRTH);
+        assert_eq!(active_stake_after, active_stake_before + 24 * ONE_TLKD);
         let treasury_balance = state
             .cells
             .cells
             .get(&treasury_system_cell_id())
             .unwrap()
             .balance;
-        assert_eq!(treasury_balance, 10 * ONE_TRTH);
+        assert_eq!(treasury_balance, 10 * ONE_TLKD);
     }
 
     #[test]
     fn treasury_distribution_burns_when_no_recipients_exist() {
         let mut state = State::genesis();
-        state.accumulated_gas_fees = 5 * ONE_TRTH;
-        state.accumulated_name_fees = 5 * ONE_TRTH;
-        state.accumulated_compute_fees_trth = 5 * ONE_TRTH;
+        state.accumulated_gas_fees = 5 * ONE_TLKD;
+        state.accumulated_name_fees = 5 * ONE_TLKD;
+        state.accumulated_compute_fees_tlkd = 5 * ONE_TLKD;
 
         let diff = state.compute_treasury_distribution_diff().unwrap();
 
         assert!(diff.staking_rewards.is_empty());
         assert!(diff.native_transfers.is_empty());
-        assert_eq!(diff.fee_burned, 15 * ONE_TRTH);
-        assert_eq!(diff.gas_fee_spent, 5 * ONE_TRTH);
-        assert_eq!(diff.name_fee_spent, 5 * ONE_TRTH);
-        assert_eq!(diff.compute_fee_spent, 5 * ONE_TRTH);
+        assert_eq!(diff.fee_burned, 15 * ONE_TLKD);
+        assert_eq!(diff.gas_fee_spent, 5 * ONE_TLKD);
+        assert_eq!(diff.name_fee_spent, 5 * ONE_TLKD);
+        assert_eq!(diff.compute_fee_spent, 5 * ONE_TLKD);
     }
 
     #[test]
@@ -4202,7 +4214,7 @@ impl State {
                     AccountRecord {
                         pubkey_bytes: recipient_pubkey.to_vec(),
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     }
@@ -5616,7 +5628,7 @@ impl State {
     /// Gas-only distribution helper retained for focused determinism tests.
     ///
     /// Live consensus uses `compute_treasury_distribution_diff`, which applies
-    /// the protocol-wide validator, Staked TRTH holder, and burn split.
+    /// the protocol-wide validator, Staked TLKD holder, and burn split.
     pub fn compute_gas_fee_distribution_diff(&self) -> Result<StateDiff, String> {
         let mut diff = StateDiff::default();
         diff.is_system = true;
@@ -5715,7 +5727,7 @@ impl State {
     /// Name-only distribution helper retained for focused distribution tests.
     ///
     /// Live consensus uses `compute_treasury_distribution_diff`, which applies
-    /// the protocol-wide validator, Staked TRTH holder, and burn split.
+    /// the protocol-wide validator, Staked TLKD holder, and burn split.
     pub fn compute_name_fee_distribution_diff(&self) -> Result<StateDiff, String> {
         let mut diff = StateDiff::default();
         diff.is_system = true;
@@ -5761,10 +5773,10 @@ impl State {
         }
 
         tracing::info!(
-            " Distributing {} TRTH name fees equally to {} validators ({} TRTH each)",
-            fees_to_distribute / ONE_TRTH,
+            " Distributing {} TLKD name fees equally to {} validators ({} TLKD each)",
+            fees_to_distribute / ONE_TLKD,
             validator_count,
-            share_per_validator / ONE_TRTH
+            share_per_validator / ONE_TLKD
         );
 
         for (account_id, share) in shares {
@@ -5777,12 +5789,12 @@ impl State {
         Ok(diff)
     }
 
-    /// Distribute accumulated TRTH revenue: 60% validators, 20% staking holders, 20% burn.
+    /// Distribute accumulated TLKD revenue: 60% validators, 20% staking holders, 20% burn.
     pub fn compute_treasury_distribution_diff(&self) -> Result<StateDiff, String> {
         let protocol_revenue = self
             .accumulated_gas_fees
             .saturating_add(self.accumulated_name_fees)
-            .saturating_add(self.accumulated_compute_fees_trth);
+            .saturating_add(self.accumulated_compute_fees_tlkd);
         let treasury_revenue = self.accumulated_treasury_fees;
         let total_revenue = protocol_revenue.saturating_add(treasury_revenue);
         if total_revenue == 0 {
@@ -5800,7 +5812,7 @@ impl State {
         diff.gas_fee_spent = self.accumulated_gas_fees;
         diff.name_fee_spent = self.accumulated_name_fees;
         diff.treasury_fee_spent = self.accumulated_treasury_fees;
-        diff.compute_fee_spent = self.accumulated_compute_fees_trth;
+        diff.compute_fee_spent = self.accumulated_compute_fees_tlkd;
 
         // Validator distribution (active stake only).
         let active_validators = self.staking.get_active_validators();
@@ -5869,11 +5881,11 @@ impl State {
         diff.fee_burned = burn_share;
 
         tracing::info!(
-            "Treasury distribution: total={} TRTH, validators={}, staking={}, burn={}",
-            total_revenue / ONE_TRTH,
-            validator_share / ONE_TRTH,
-            staking_share / ONE_TRTH,
-            burn_share / ONE_TRTH
+            "Treasury distribution: total={} TLKD, validators={}, staking={}, burn={}",
+            total_revenue / ONE_TLKD,
+            validator_share / ONE_TLKD,
+            staking_share / ONE_TLKD,
+            burn_share / ONE_TLKD
         );
 
         Ok(diff)

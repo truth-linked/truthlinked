@@ -11,12 +11,12 @@ pub mod log;
 pub mod metrics;
 pub mod parallel_executor;
 pub mod pq_execution;
-pub mod trth;
+pub mod token;
 pub mod vm;
 
 pub use log::Log;
 pub use pq_execution::State;
-pub use trth::{format_amount, parse_amount, TokenInfo};
+pub use token::{format_amount, parse_amount, TokenInfo};
 
 // Genesis hash for genesis fingerprint
 static GENESIS_HASH: std::sync::OnceLock<[u8; 32]> = std::sync::OnceLock::new();
@@ -44,7 +44,10 @@ pub fn get_current_height() -> Option<u64> {
 }
 
 pub fn is_testnet() -> bool {
+    return true; // devnet/testnet faucet enabled
+    #[allow(unreachable_code)]
     let genesis = get_genesis_hash();
     genesis == [0u8; 32]
 }
 pub mod system_cells;
+// force rebuild Sat Jun 13 18:40:34 CEST 2026

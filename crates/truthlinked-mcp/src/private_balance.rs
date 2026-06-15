@@ -9,10 +9,10 @@
 //!   TOTAL_DEPOSITED, TOTAL_WITHDRAWN, TOTAL_FEES - monotonic u128 counters
 //!   STAKE_VERIFIED - u8 flag set at init, re-checked every circuit
 //!
-//! Deposit:  public TRTH → private balance. Amount revealed (it's a public tx).
+//! Deposit:  public TLKD → private balance. Amount revealed (it's a public tx).
 //!           Balance before/after hidden. Commitment + ciphertext updated.
 //!
-//! Withdraw: private balance → public TRTH. Amount revealed.
+//! Withdraw: private balance → public TLKD. Amount revealed.
 //!           Balance before/after hidden.
 //!
 //! Confidential Transfer: amount AND balances hidden.
@@ -24,7 +24,7 @@
 //!
 //! ## Staking gate
 //!
-//! Owner must have ≥ PRIVATE_BALANCE_MIN_STAKE TRTH staked at init time.
+//! Owner must have ≥ PRIVATE_BALANCE_MIN_STAKE TLKD staked at init time.
 //! The stake requirement is re-checked on every circuit call.
 //! If the owner unstakes below the threshold, all circuits revert.
 
@@ -45,7 +45,7 @@ use crate::McpStateView;
 // Constants
 // ---------------------------------------------------------------------------
 
-/// 100,000 TRTH in base units (ONE_TRTH = 1_000_000_000)
+/// 100,000 TLKD in base units (ONE_TLKD = 1_000_000_000)
 pub const PRIVATE_BALANCE_MIN_STAKE: u64 = 100_000 * 1_000_000_000u64;
 
 pub const MAX_PRIVATE_BALANCE: u128 = (1u128 << 96) - 1;
@@ -310,7 +310,7 @@ fn check_stake_gate(staking: &StakingState, owner_pubkey_bytes: &[u8]) -> Result
         .unwrap_or(0);
     if stake < PRIVATE_BALANCE_MIN_STAKE {
         return Err(format!(
-            "Insufficient stake: owner has {} staked, minimum required is {} (100,000 TRTH)",
+            "Insufficient stake: owner has {} staked, minimum required is {} (100,000 TLKD)",
             stake, PRIVATE_BALANCE_MIN_STAKE
         ));
     }
@@ -419,7 +419,7 @@ fn check_new_nonce(new_nonce_bytes: &[u8; 16], old_nonce: u128) -> Result<u128, 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PrivateBalanceIntent {
-    /// Owner deploys private balance cell. Requires 100k TRTH staked.
+    /// Owner deploys private balance cell. Requires 100k TLKD staked.
     InitPrivateBalance {
         cell_id: AccountId,
         agent_id: AccountId,
@@ -428,7 +428,7 @@ pub enum PrivateBalanceIntent {
         commit_nonce: [u8; 16],
     },
 
-    /// Deposit public TRTH into private balance.
+    /// Deposit public TLKD into private balance.
     /// Amount is revealed (it's a public debit). Balance before/after hidden.
     Deposit {
         cell_id: AccountId,
@@ -1239,7 +1239,7 @@ mod tests {
             AccountRecord {
                 pubkey_bytes: id.to_vec(), // pubkey = id bytes for test simplicity
                 balance,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },

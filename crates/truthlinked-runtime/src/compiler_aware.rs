@@ -64,8 +64,8 @@ impl ConcreteConflictDomain {
             }
             TransactionIntent::DepositCompute { .. }
             | TransactionIntent::WithdrawCompute { .. }
-            | TransactionIntent::WrapTRTH { .. }
-            | TransactionIntent::UnwrapTRTH { .. } => {
+            | TransactionIntent::WrapTLKD { .. }
+            | TransactionIntent::UnwrapTLKD { .. } => {
                 writes.insert(StorageKey::Account(tx.sender));
             }
 

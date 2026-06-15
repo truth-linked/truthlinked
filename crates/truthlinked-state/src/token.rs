@@ -2,11 +2,11 @@
 //!
 //! The native coin is displayed as TLKD. Its smallest unit is displayed as
 //! xiom and uses the same nine-decimal base-unit scale that earlier internal
-//! code names still refer to as `ONE_TRTH`.
+//! code names still refer to as `ONE_TLKD`.
 
 use crate::constants::{TOKEN_DECIMALS, TOKEN_NAME, TOKEN_SUBUNIT, TOKEN_SYMBOL, TOTAL_SUPPLY};
 use serde::{Deserialize, Serialize};
-use truthlinked_core::constants::ONE_TRTH;
+use truthlinked_core::constants::ONE_TLKD;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TokenInfo {
@@ -32,8 +32,8 @@ impl TokenInfo {
 }
 
 pub fn format_amount(amount: u128) -> String {
-    let whole = amount / ONE_TRTH;
-    let fractional = amount % ONE_TRTH;
+    let whole = amount / ONE_TLKD;
+    let fractional = amount % ONE_TLKD;
 
     if fractional == 0 {
         format!("{} {}", whole, TOKEN_SYMBOL)
@@ -77,10 +77,10 @@ pub fn parse_amount(s: &str) -> Result<u128, String> {
             .parse()
             .map_err(|_| "Invalid fractional amount")?;
 
-        Ok(whole * ONE_TRTH + frac)
+        Ok(whole * ONE_TLKD + frac)
     } else {
         let whole: u128 = s.parse().map_err(|_| "Invalid amount")?;
-        Ok(whole * ONE_TRTH)
+        Ok(whole * ONE_TLKD)
     }
 }
 
@@ -90,26 +90,26 @@ mod tests {
 
     #[test]
     fn test_total_supply() {
-        assert_eq!(TOTAL_SUPPLY, 1_000_000_000 * ONE_TRTH);
+        assert_eq!(TOTAL_SUPPLY, 1_000_000_000 * ONE_TLKD);
     }
 
     #[test]
     fn test_format_amount() {
-        assert_eq!(format_amount(ONE_TRTH), "1 TLKD");
-        assert_eq!(format_amount(ONE_TRTH * 100), "100 TLKD");
-        assert_eq!(format_amount(ONE_TRTH + 500_000_000), "1.5 TLKD");
+        assert_eq!(format_amount(ONE_TLKD), "1 TLKD");
+        assert_eq!(format_amount(ONE_TLKD * 100), "100 TLKD");
+        assert_eq!(format_amount(ONE_TLKD + 500_000_000), "1.5 TLKD");
         assert_eq!(format_amount(123_456_789), "0.123456789 TLKD");
         assert_eq!(format_links(123_456_789), "123456789 xiom");
     }
 
     #[test]
     fn test_parse_amount() {
-        assert_eq!(parse_amount("1").unwrap(), ONE_TRTH);
-        assert_eq!(parse_amount("100").unwrap(), 100 * ONE_TRTH);
-        assert_eq!(parse_amount("1.5").unwrap(), ONE_TRTH + 500_000_000);
+        assert_eq!(parse_amount("1").unwrap(), ONE_TLKD);
+        assert_eq!(parse_amount("100").unwrap(), 100 * ONE_TLKD);
+        assert_eq!(parse_amount("1.5").unwrap(), ONE_TLKD + 500_000_000);
         assert_eq!(parse_amount("0.123456789").unwrap(), 123_456_789);
         assert_eq!(parse_amount("0.000000001").unwrap(), 1);
-        assert_eq!(parse_amount("1 TLKD").unwrap(), ONE_TRTH);
+        assert_eq!(parse_amount("1 TLKD").unwrap(), ONE_TLKD);
         assert_eq!(parse_amount("123456789 xiom").unwrap(), 123_456_789);
         assert!(parse_amount("0.0000000001").is_err());
         assert!(parse_amount("1.").is_err());

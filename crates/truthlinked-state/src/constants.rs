@@ -53,7 +53,7 @@ pub const TOKEN_DECIMALS: u8 = 9;
 pub const TOTAL_SUPPLY: u128 = 1_000_000_000_000_000_000;
 
 /// Maximum total devnet faucet mint allowance (100 million TLKD).
-pub const MAX_TESTNET_MINT: u128 = 100_000_000 * truthlinked_core::constants::ONE_TRTH;
+pub const MAX_TESTNET_MINT: u128 = 100_000_000 * truthlinked_core::constants::ONE_TLKD;
 
 // ========== STORAGE PARAMETERS ==========
 
@@ -193,8 +193,8 @@ pub const STAKED_TRTH_MAX_LOCK_BLOCKS: u64 = 4 * 365 * 432_000;
 /// Blocks per year at 300ms block time (365.25 days × 24h × 3600s / 0.3s)
 pub const BLOCKS_PER_YEAR: u64 = 105_120_000;
 
-/// Year-1 treasury emission in whole TLKD (multiply by ONE_TRTH for xiom)
-pub const EMISSION_YEAR1_TRTH: u128 = 25_000_000;
+/// Year-1 treasury emission in whole TLKD (multiply by ONE_TLKD for xiom)
+pub const EMISSION_YEAR1_TLKD: u128 = 25_000_000;
 
 /// Annual emission decay in basis points (2000 = 20%)
 pub const EMISSION_DECAY_BPS_PER_YEAR: u64 = 2_000;

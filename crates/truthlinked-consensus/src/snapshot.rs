@@ -42,7 +42,7 @@ pub struct StateSnapshot {
     #[serde(default)]
     pub accumulated_name_fees: u128,
     #[serde(default)]
-    pub accumulated_compute_fees_trth: u128,
+    pub accumulated_compute_fees_tlkd: u128,
     #[serde(default)]
     pub accumulated_treasury_fees: u128,
     #[serde(default)]
@@ -121,7 +121,7 @@ impl StateSnapshot {
             cells: truthlinked_runtime::cells::CellState::new(),
             accumulated_gas_fees: 0,
             accumulated_name_fees: 0,
-            accumulated_compute_fees_trth: 0,
+            accumulated_compute_fees_tlkd: 0,
             accumulated_treasury_fees: 0,
             accumulated_epoch_fees: 0,
             last_emission_epoch: 0,
@@ -164,7 +164,7 @@ impl StateSnapshot {
             cells: state.cells.clone(),
             accumulated_gas_fees: state.accumulated_gas_fees,
             accumulated_name_fees: state.accumulated_name_fees,
-            accumulated_compute_fees_trth: state.accumulated_compute_fees_trth,
+            accumulated_compute_fees_tlkd: state.accumulated_compute_fees_tlkd,
             accumulated_treasury_fees: state.accumulated_treasury_fees,
             accumulated_epoch_fees: state.accumulated_epoch_fees,
             last_emission_epoch: state.last_emission_epoch,
@@ -217,7 +217,7 @@ impl StateSnapshot {
             &self.cells,
             self.accumulated_gas_fees,
             self.accumulated_name_fees,
-            self.accumulated_compute_fees_trth,
+            self.accumulated_compute_fees_tlkd,
             self.accumulated_treasury_fees,
             self.accumulated_epoch_fees,
             self.last_emission_epoch,
@@ -255,7 +255,7 @@ impl StateSnapshot {
             &state.cells,
             state.accumulated_gas_fees,
             state.accumulated_name_fees,
-            state.accumulated_compute_fees_trth,
+            state.accumulated_compute_fees_tlkd,
             state.accumulated_treasury_fees,
             state.accumulated_epoch_fees,
             state.last_emission_epoch,
@@ -284,7 +284,7 @@ impl StateSnapshot {
         cells: &truthlinked_runtime::cells::CellState,
         accumulated_gas_fees: u128,
         accumulated_name_fees: u128,
-        accumulated_compute_fees_trth: u128,
+        accumulated_compute_fees_tlkd: u128,
         accumulated_treasury_fees: u128,
         accumulated_epoch_fees: u128,
         last_emission_epoch: u64,
@@ -328,8 +328,8 @@ impl StateSnapshot {
         hash_tag(&mut hasher, b"accumulated_name_fees");
         hash_u128(&mut hasher, accumulated_name_fees);
 
-        hash_tag(&mut hasher, b"accumulated_compute_fees_trth");
-        hash_u128(&mut hasher, accumulated_compute_fees_trth);
+        hash_tag(&mut hasher, b"accumulated_compute_fees_tlkd");
+        hash_u128(&mut hasher, accumulated_compute_fees_tlkd);
 
         hash_tag(&mut hasher, b"accumulated_treasury_fees");
         hash_u128(&mut hasher, accumulated_treasury_fees);
@@ -643,7 +643,7 @@ fn hash_vec_fixed_32(hasher: &mut sha2::Sha256, values: &[[u8; 32]]) {
 fn hash_account_record(hasher: &mut sha2::Sha256, account: &AccountRecord) {
     hash_bytes(hasher, &account.pubkey_bytes);
     hash_u128(hasher, account.balance);
-    hash_u128(hasher, account.compute_escrow_trth);
+    hash_u128(hasher, account.compute_escrow_tlkd);
     hasher.update(&(account.nfts.len() as u32).to_le_bytes());
     for nft in &account.nfts {
         hasher.update(nft);

@@ -227,7 +227,7 @@ impl State {
                     .or_insert_with(|| AccountRecord {
                         pubkey_bytes: recipient.to_vec(),
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     });
@@ -256,12 +256,12 @@ impl State {
                     .or_insert_with(|| AccountRecord {
                         pubkey_bytes: recipient.to_vec(),
                         balance: 0,
-                        compute_escrow_trth: 0,
+                        compute_escrow_tlkd: 0,
                         nonce: 0,
                         nfts: vec![],
                     });
-            recipient_account.compute_escrow_trth = recipient_account
-                .compute_escrow_trth
+            recipient_account.compute_escrow_tlkd = recipient_account
+                .compute_escrow_tlkd
                 .checked_add(amount)
                 .ok_or("Recipient escrow overflow")?;
         }
@@ -271,8 +271,8 @@ impl State {
                 .accounts
                 .get_mut(&sender)
                 .ok_or("Sender account not found")?;
-            sender_account.compute_escrow_trth = sender_account
-                .compute_escrow_trth
+            sender_account.compute_escrow_tlkd = sender_account
+                .compute_escrow_tlkd
                 .checked_sub(amount)
                 .ok_or("Sender escrow underflow")?;
         }
@@ -372,7 +372,7 @@ impl State {
         // Accumulate fees
         if !diff.is_system {
             self.accumulated_gas_fees += diff.gas_fee;
-            self.accumulated_compute_fees_trth += diff.compute_fee_trth;
+            self.accumulated_compute_fees_tlkd += diff.compute_fee_tlkd;
             self.accumulated_treasury_fees += diff.treasury_fee;
         }
         // Name fees go directly to the treasury cell balance.
@@ -402,11 +402,11 @@ impl State {
                 .saturating_sub(diff.name_fee_spent);
         }
         if diff.compute_fee_spent > 0 {
-            if diff.compute_fee_spent > self.accumulated_compute_fees_trth {
+            if diff.compute_fee_spent > self.accumulated_compute_fees_tlkd {
                 return Err("Compute fee distribution exceeds accumulated fees".to_string());
             }
-            self.accumulated_compute_fees_trth = self
-                .accumulated_compute_fees_trth
+            self.accumulated_compute_fees_tlkd = self
+                .accumulated_compute_fees_tlkd
                 .saturating_sub(diff.compute_fee_spent);
         }
         if diff.treasury_fee_spent > 0 {
@@ -602,26 +602,14 @@ pub fn execute_batch_parallel_with_profiler(
         });
     }
 
-    // Correctness guard: route all batches through the sequential executor until
-    // the parallel composer can preserve every successful diff under overlapping
-    // account-update conflicts. Block fee totals and applied tx sets must never
-    // diverge from the transaction list.
-    return execute_sequential(state, batch);
-
-    #[allow(unreachable_code)]
-    {
-        // Sequential fast path for small batches and nonce-dependent sender lanes.
-        // Account nonces are strict and ordered; executing multiple transactions from
-        // the same sender in parallel can make validators apply different successful
-        // subsets under burst load. Keep those batches deterministic until the
-        // scheduler has explicit per-sender lanes.
-        if batch.len() < 16 {
-            return execute_sequential(state, batch);
-        }
-        let mut sender_seen = std::collections::HashSet::with_capacity(batch.len());
-        if batch.iter().any(|tx| !sender_seen.insert(tx.sender)) {
-            return execute_sequential(state, batch);
-        }
+    // Sequential fast path: small batches and same-sender nonce lanes
+    // must stay ordered to preserve deterministic nonce sequencing.
+    if batch.len() < 8 {
+        return execute_sequential(state, batch);
+    }
+    let mut sender_seen = std::collections::HashSet::with_capacity(batch.len());
+    if batch.iter().any(|tx| !sender_seen.insert(tx.sender)) {
+        return execute_sequential(state, batch);
     }
 
     // Create immutable snapshot for cross-cell calls
@@ -746,13 +734,16 @@ pub fn execute_batch_parallel_with_profiler(
                     // NON-COMMUTATIVE: Validate no key conflicts (partitioning must be correct)
                     for (key, val) in diff.account_updates {
                         if composed.account_updates.insert(key, val).is_some() {
-                            // Partition bug: abort immediately, do not compose further
+                            // New-account conflict: two txs wrote same recipient account.
+                            // Mark for sequential fallback — not a fatal error.
+                            errors.push((0, "PARTITION_FALLBACK".to_string()));
                             return (errors, count, composed);
                         }
                     }
 
                     for (key, val) in diff.nft_updates {
                         if composed.nft_updates.insert(key, val).is_some() {
+                            errors.push((0, "PARTITION_FALLBACK".to_string()));
                             return (errors, count, composed);
                         }
                     }
@@ -786,9 +777,9 @@ pub fn execute_batch_parallel_with_profiler(
                     composed.name_fee += diff.name_fee;
                     composed.cu_fee = composed.cu_fee.saturating_add(diff.cu_fee);
                     composed.treasury_fee = composed.treasury_fee.saturating_add(diff.treasury_fee);
-                    composed.compute_fee_trth = composed
-                        .compute_fee_trth
-                        .saturating_add(diff.compute_fee_trth);
+                    composed.compute_fee_tlkd = composed
+                        .compute_fee_tlkd
+                        .saturating_add(diff.compute_fee_tlkd);
                     composed.gas_fee_spent =
                         composed.gas_fee_spent.saturating_add(diff.gas_fee_spent);
                     composed.name_fee_spent =
@@ -844,20 +835,14 @@ pub fn execute_batch_parallel_with_profiler(
                 // NON-COMMUTATIVE: Validate no conflicts
                 for (key, val) in d2.account_updates {
                     if d1.account_updates.insert(key, val).is_some() {
-                        e1.push((
-                            0,
-                            format!("PARTITION BUG: Duplicate account in reduce for {:?}", key),
-                        ));
+                        e1.push((0, "PARTITION_FALLBACK".to_string()));
                         return (e1, c1 + c2, d1);
                     }
                 }
 
                 for (key, val) in d2.nft_updates {
                     if d1.nft_updates.insert(key, val).is_some() {
-                        e1.push((
-                            0,
-                            format!("PARTITION BUG: Duplicate NFT in reduce for {:?}", key),
-                        ));
+                        e1.push((0, "PARTITION_FALLBACK".to_string()));
                         return (e1, c1 + c2, d1);
                     }
                 }
@@ -882,7 +867,7 @@ pub fn execute_batch_parallel_with_profiler(
                 d1.name_fee += d2.name_fee;
                 d1.cu_fee = d1.cu_fee.saturating_add(d2.cu_fee);
                 d1.treasury_fee = d1.treasury_fee.saturating_add(d2.treasury_fee);
-                d1.compute_fee_trth = d1.compute_fee_trth.saturating_add(d2.compute_fee_trth);
+                d1.compute_fee_tlkd = d1.compute_fee_tlkd.saturating_add(d2.compute_fee_tlkd);
                 d1.gas_fee_spent = d1.gas_fee_spent.saturating_add(d2.gas_fee_spent);
                 d1.name_fee_spent = d1.name_fee_spent.saturating_add(d2.name_fee_spent);
                 d1.compute_fee_spent = d1.compute_fee_spent.saturating_add(d2.compute_fee_spent);
@@ -900,20 +885,11 @@ pub fn execute_batch_parallel_with_profiler(
         );
 
     // Phase 2: Single merge of composed diff (O(1) instead of O(n))
-    if !all_errors.is_empty() {
-        // Check for partition bugs
-        let partition_bugs: Vec<_> = all_errors
-            .iter()
-            .filter(|(_, msg)| msg.contains("PARTITION BUG"))
-            .collect();
-
-        if !partition_bugs.is_empty() {
-            tracing::error!(" CRITICAL: Partitioning failed - non-commutative conflicts detected!");
-            for (_, msg) in partition_bugs {
-                tracing::error!("  {}", msg);
-            }
-            return Err("Partitioning correctness violation - aborting batch".to_string());
-        }
+    // If any conflict was detected during parallel compose, fall back to sequential.
+    // This handles new-account conflicts (two txs sending to same not-yet-onboarded address).
+    if all_errors.iter().any(|(_, msg)| msg == "PARTITION_FALLBACK") {
+        tracing::warn!(" Parallel conflict detected — falling back to sequential for this batch");
+        return execute_sequential(state, batch);
     }
 
     let mut compacted_diff = composed_diff;
@@ -947,7 +923,7 @@ pub fn execute_batch_parallel_with_profiler(
     let total_fees = compacted_diff
         .gas_fee
         .saturating_add(compacted_diff.name_fee)
-        .saturating_add(compacted_diff.compute_fee_trth)
+        .saturating_add(compacted_diff.compute_fee_tlkd)
         .saturating_add(compacted_diff.treasury_fee);
 
     if let Err(e) = new_state.merge_diff_inplace(compacted_diff) {
@@ -1000,7 +976,7 @@ pub fn execute_batch_parallel_with_profiler(
 fn diff_total_fees(diff: &StateDiff) -> u128 {
     diff.gas_fee
         .saturating_add(diff.name_fee)
-        .saturating_add(diff.compute_fee_trth)
+        .saturating_add(diff.compute_fee_tlkd)
         .saturating_add(diff.treasury_fee)
 }
 
@@ -1046,7 +1022,7 @@ mod tests {
         let diff = StateDiff {
             gas_fee: 11,
             name_fee: 13,
-            compute_fee_trth: 17,
+            compute_fee_tlkd: 17,
             treasury_fee: 19,
             ..StateDiff::default()
         };

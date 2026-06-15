@@ -800,7 +800,7 @@ impl Storage {
         &self,
         tx: &truthlinked_core::pq_execution::Transaction,
     ) -> (u128, u128, u128, u128) {
-        use truthlinked_core::constants::ONE_TRTH;
+        use truthlinked_core::constants::ONE_TLKD;
         use truthlinked_core::pq_execution::TransactionIntent;
         use truthlinked_governance::params as gp;
 
@@ -891,21 +891,21 @@ impl Storage {
             _ => (byte_fee, 0),
         };
 
-        let compute_fee_trth = if cu_fee > 0 {
-            let cu_per_trth = gp::get_u64(gp::PARAM_CU_PER_TRTH) as u128;
-            if cu_per_trth == 0 {
+        let compute_fee_tlkd = if cu_fee > 0 {
+            let cu_per_tlkd = gp::get_u64(gp::PARAM_CU_PER_TLKD) as u128;
+            if cu_per_tlkd == 0 {
                 0
             } else {
                 cu_fee
-                    .saturating_mul(ONE_TRTH)
-                    .saturating_add(cu_per_trth - 1)
-                    / cu_per_trth
+                    .saturating_mul(ONE_TLKD)
+                    .saturating_add(cu_per_tlkd - 1)
+                    / cu_per_tlkd
             }
         } else {
             0
         };
-        let fee_paid_tlkd = gas_fee.saturating_add(compute_fee_trth);
-        (gas_fee, cu_fee, compute_fee_trth, fee_paid_tlkd)
+        let fee_paid_tlkd = gas_fee.saturating_add(compute_fee_tlkd);
+        (gas_fee, cu_fee, compute_fee_tlkd, fee_paid_tlkd)
     }
 
     fn compress_intent(
@@ -1143,7 +1143,7 @@ impl Storage {
                             "type": "Transfer",
                             "recipient_account_id": hex::encode(recipient),
                             "recipient_pubkey": hex::encode(recipient_pubkey.as_deref().unwrap_or_default()),
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
@@ -1154,7 +1154,7 @@ impl Storage {
                                 serde_json::json!({
                                     "recipient_account_id": hex::encode(t.recipient),
                                     "recipient_pubkey": hex::encode(t.recipient_pubkey.as_deref().unwrap_or_default()),
-                                    "amount": truthlinked_state::trth::format_amount(t.amount),
+                                    "amount": truthlinked_state::token::format_amount(t.amount),
                                     "amount_raw": t.amount.to_string(),
                                 })
                             })
@@ -1168,21 +1168,21 @@ impl Storage {
                         serde_json::json!({
                             "type": "TransferToName",
                             "name": name,
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
                     truthlinked_core::pq_execution::TransactionIntent::DepositCompute { amount } => {
                         serde_json::json!({
                             "type": "DepositCompute",
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
                     truthlinked_core::pq_execution::TransactionIntent::WithdrawCompute { amount } => {
                         serde_json::json!({
                             "type": "WithdrawCompute",
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
@@ -1192,7 +1192,7 @@ impl Storage {
                             .map(|t| {
                                 serde_json::json!({
                                     "name": t.name,
-                                    "amount": truthlinked_state::trth::format_amount(t.amount),
+                                    "amount": truthlinked_state::token::format_amount(t.amount),
                                     "amount_raw": t.amount.to_string(),
                                 })
                             })
@@ -1207,7 +1207,7 @@ impl Storage {
                             "type": "Claim",
                             "recipient_account_id": hex::encode(recipient),
                             "recipient_pubkey": hex::encode(recipient_pubkey.as_deref().unwrap_or_default()),
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
@@ -1220,14 +1220,14 @@ impl Storage {
                     truthlinked_core::pq_execution::TransactionIntent::Stake { amount } => {
                         serde_json::json!({
                             "type": "Stake",
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
                     truthlinked_core::pq_execution::TransactionIntent::Unstake { amount } => {
                         serde_json::json!({
                             "type": "Unstake",
-                            "amount": truthlinked_state::trth::format_amount(*amount),
+                            "amount": truthlinked_state::token::format_amount(*amount),
                             "amount_raw": amount.to_string(),
                         })
                     }
@@ -1258,7 +1258,7 @@ impl Storage {
                             "nft_id": hex::encode(nft_id),
                             "recipient_account_id": hex::encode(recipient),
                             "recipient_pubkey": hex::encode(recipient_pubkey.as_deref().unwrap_or_default()),
-                            "sale_price": sale_price.map(|p| truthlinked_state::trth::format_amount(p)),
+                            "sale_price": sale_price.map(|p| truthlinked_state::token::format_amount(p)),
                         })
                     }
                     truthlinked_core::pq_execution::TransactionIntent::BurnNFT { nft_id } => {
@@ -1524,11 +1524,11 @@ impl Storage {
                             "response_body_len": response_body.len(),
                         })
                     }
-                    truthlinked_core::pq_execution::TransactionIntent::WrapTRTH { amount } => {
-                        serde_json::json!({ "type": "WrapTRTH", "amount": amount.to_string() })
+                    truthlinked_core::pq_execution::TransactionIntent::WrapTLKD { amount } => {
+                        serde_json::json!({ "type": "WrapTLKD", "amount": amount.to_string() })
                     }
-                    truthlinked_core::pq_execution::TransactionIntent::UnwrapTRTH { amount } => {
-                        serde_json::json!({ "type": "UnwrapTRTH", "amount": amount.to_string() })
+                    truthlinked_core::pq_execution::TransactionIntent::UnwrapTLKD { amount } => {
+                        serde_json::json!({ "type": "UnwrapTLKD", "amount": amount.to_string() })
                     }
                 };
 
@@ -1702,7 +1702,7 @@ impl Storage {
                     Ok(serde_json::json!({
                         "type": "Transfer",
                         "recipient": hex::encode(recipient),
-                        "amount": truthlinked_state::trth::format_amount(amount),
+                        "amount": truthlinked_state::token::format_amount(amount),
                     }))
                 } else {
                     Err("Invalid transfer data".into())
@@ -1714,7 +1714,7 @@ impl Storage {
                     let amount = u128::from_le_bytes(data[0..16].try_into()?);
                     Ok(serde_json::json!({
                         "type": "Stake",
-                        "amount": truthlinked_state::trth::format_amount(amount),
+                        "amount": truthlinked_state::token::format_amount(amount),
                     }))
                 } else {
                     Err("Invalid stake data".into())
@@ -1762,7 +1762,7 @@ impl Storage {
                     .and_then(|bytes| String::from_utf8(bytes).ok())
                     .unwrap_or_else(|| "success".to_string());
                 let is_success = result == "success";
-                let (gas_fee, cu_fee, compute_fee_trth, fee_paid_tlkd) = if is_success {
+                let (gas_fee, cu_fee, compute_fee_tlkd, fee_paid_tlkd) = if is_success {
                     self.compute_tx_fee_summary(tx)
                 } else {
                     (0, 0, 0, 0)
@@ -2753,11 +2753,11 @@ impl Storage {
                     "response_body": hash_and_len(response_body),
                 })
             }
-            truthlinked_core::pq_execution::TransactionIntent::WrapTRTH { amount } => {
-                serde_json::json!({ "type": "WrapTRTH", "amount": amount.to_string() })
+            truthlinked_core::pq_execution::TransactionIntent::WrapTLKD { amount } => {
+                serde_json::json!({ "type": "WrapTLKD", "amount": amount.to_string() })
             }
-            truthlinked_core::pq_execution::TransactionIntent::UnwrapTRTH { amount } => {
-                serde_json::json!({ "type": "UnwrapTRTH", "amount": amount.to_string() })
+            truthlinked_core::pq_execution::TransactionIntent::UnwrapTLKD { amount } => {
+                serde_json::json!({ "type": "UnwrapTLKD", "amount": amount.to_string() })
             }
         };
         Self::ensure_kind(&mut value);
@@ -3373,7 +3373,7 @@ mod tests {
             truthlinked_runtime::types::AccountRecord {
                 pubkey_bytes: pk,
                 balance: 1234,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },

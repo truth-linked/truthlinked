@@ -185,7 +185,7 @@ pub mod policy_keys {
     pub const RATE_LIMIT: [u8; 32] = truthlinked_core::constants::MCP_POLICY_RATE_LIMIT_KEY;
     /// Max calls per minute: u32
     pub const SPEND_PER_TX: [u8; 32] = truthlinked_core::constants::MCP_POLICY_SPEND_PER_TX_KEY;
-    /// Max TRTH per tx: u128 LE
+    /// Max TLKD per tx: u128 LE
     pub const SPEND_EPOCH: [u8; 32] = truthlinked_core::constants::MCP_POLICY_SPEND_EPOCH_KEY;
     pub const EPOCH_USED: [u8; 32] = truthlinked_core::constants::MCP_POLICY_EPOCH_USED_KEY;
     pub const EPOCH_RESET_TS: [u8; 32] = truthlinked_core::constants::MCP_POLICY_EPOCH_RESET_TS_KEY;
@@ -1457,9 +1457,9 @@ pub fn enumerate_tools(
 
         let builtin_descs: std::collections::HashMap<&str, &str> = [
             ("get_chain_info",      "Get current chain height, genesis hash, finalized height, and network info."),
-            ("get_balance",         "Get TRTH balance for an account. Input: account_id as 64-char hex."),
+            ("get_balance",         "Get TLKD balance for an account. Input: account_id as 64-char hex."),
             ("get_validators",      "List all active validators with stake and status."),
-            ("get_token_info",      "Get TRTH token metadata: name, symbol, decimals, total supply."),
+            ("get_token_info",      "Get TLKD token metadata: name, symbol, decimals, total supply."),
             ("get_cell_info",       "Get cell account info by cell_id as 64-char hex."),
             ("get_transaction",     "Get transaction details by tx_hash as 64-char hex."),
             ("get_staking_info",    "Get staking state: total staked, validator count, epoch info."),
@@ -1468,7 +1468,7 @@ pub fn enumerate_tools(
             ("submit_transaction",  "Submit a pre-signed transaction (hex-encoded bincode). Returns tx_hash."),
             ("http_fetch",          "Queue an oracle HTTP GET. Validators fetch and commit-reveal the response. Returns request_id."),
             ("get_sdk",              "Get Axiom CLI build and usage instructions. Axiom CLI generates ML-DSA-65 keypairs, signs transactions, and submits them to TruthLinked."),
-            ("faucet",               "Claim testnet TRTH tokens with Axiom CLI. Run axiom account-create first, then axiom faucet --from mykeys.json. 12-hour cooldown per account."),
+            ("faucet",               "Claim testnet TLKD tokens with Axiom CLI. Run axiom account-create first, then axiom faucet --from mykeys.json. 12-hour cooldown per account."),
         ].into_iter().collect();
 
         let input_schema = builtin_schemas.get(name.as_str())
@@ -1804,11 +1804,11 @@ pub fn deploy_mcp_genesis_cells(
     let builtin_tools: &[(&str, &str, u8, &str)] = &[
         ("get_chain_info",        "Get current chain height, genesis hash, finalized height, and network info.", 0,
          r#"{"type":"object","properties":{},"required":[]}"#),
-        ("get_balance",           "Get TRTH balance for an account. Input: account_id as 64-char hex.", 0,
+        ("get_balance",           "Get TLKD balance for an account. Input: account_id as 64-char hex.", 0,
          r#"{"type":"object","properties":{"account_id":{"type":"string","description":"32-byte account ID as hex"}},"required":["account_id"]}"#),
         ("get_validators",        "List all active validators with stake and status.", 0,
          r#"{"type":"object","properties":{},"required":[]}"#),
-        ("get_token_info",        "Get TRTH token metadata: name, symbol, decimals, total supply.", 0,
+        ("get_token_info",        "Get TLKD token metadata: name, symbol, decimals, total supply.", 0,
          r#"{"type":"object","properties":{},"required":[]}"#),
         ("get_cell_info",         "Get cell account info by cell_id as 64-char hex.", 0,
          r#"{"type":"object","properties":{"cell_id":{"type":"string","description":"32-byte cell ID as hex"}},"required":["cell_id"]}"#),
@@ -1826,7 +1826,7 @@ pub fn deploy_mcp_genesis_cells(
          r#"{"type":"object","properties":{"url":{"type":"string","description":"URL to fetch"},"cell_id":{"type":"string","description":"Cell that will consume the result (64-char hex)"}},"required":["url","cell_id"]}"#),
         ("get_sdk",               "Get Axiom CLI build and usage instructions. Axiom CLI generates ML-DSA-65 keypairs and signs transactions.", 0,
          r#"{"type":"object","properties":{},"required":[]}"#),
-        ("faucet",                "Claim testnet TRTH tokens. Requires account_id and pubkey from axiom account-create. 12-hour cooldown per account.", 0,
+        ("faucet",                "Claim testnet TLKD tokens. Requires account_id and pubkey from axiom account-create. 12-hour cooldown per account.", 0,
          r#"{"type":"object","properties":{"account_id":{"type":"string","description":"Your 64-char hex account ID"},"pubkey":{"type":"string","description":"Your Dilithium public key hex"}},"required":["account_id","pubkey"]}"#),
     ];
 
@@ -1983,7 +1983,7 @@ mod tests {
             AccountRecord {
                 pubkey_bytes: vec![],
                 balance: gp::get_u128(gp::PARAM_STORAGE_RENT_LIFETIME_FEE) * 2,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },
@@ -2078,7 +2078,7 @@ mod tests {
             AccountRecord {
                 pubkey_bytes: vec![],
                 balance: gp::get_u128(gp::PARAM_STORAGE_RENT_LIFETIME_FEE) * 2,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },

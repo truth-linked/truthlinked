@@ -4,17 +4,16 @@
 //! networking, and governance behavior. Changes should be treated as protocol
 //! changes and coordinated with every crate or service that validates chain data.
 
-pub const ONE_TRTH: u128 = 1_000_000_000;
+pub const ONE_TLKD: u128 = 1_000_000_000;
 
 /// One whole TLKD expressed in xiom base units.
-pub const ONE_TLKD: u128 = ONE_TRTH;
 
 pub const TX_SIGN_CONTEXT: &[u8] = b"truthlinked-transaction-v1";
 pub const GENERIC_SIGN_CONTEXT: &[u8] = b"truthlinked-generic-v1";
 
 pub const GAS_TRANSFER: u64 = 1_000;
 
-pub const STORAGE_RENT_LIFETIME_FEE: u128 = ONE_TRTH;
+pub const STORAGE_RENT_LIFETIME_FEE: u128 = ONE_TLKD;
 pub const TX_BYTE_FEE: u64 = 1;
 pub const MEMPOOL_MAX_BYTES: usize = 64 * 1024 * 1024;
 
@@ -25,13 +24,13 @@ pub const MAX_CALL_CHAIN_TOTAL_CALLDATA: usize = MAX_CALLDATA_SIZE;
 pub const MAX_BATCH_TRANSFER_RECIPIENTS: usize = 64;
 pub const NONCE_LOOKAHEAD: u64 = 64;
 
-pub const MIN_URL_PROPOSAL_BOND: u128 = ONE_TRTH;
-pub const MIN_RAW_URL_PROPOSAL_BOND: u128 = 5 * ONE_TRTH;
+pub const MIN_URL_PROPOSAL_BOND: u128 = ONE_TLKD;
+pub const MIN_RAW_URL_PROPOSAL_BOND: u128 = 5 * ONE_TLKD;
 pub const MAX_SCHEMA_KEYS: u64 = 64;
 pub const MAX_SCHEMA_KEY_BYTES: u64 = 64;
 pub const MAX_SCHEMA_VOTING_PERIOD_BLOCKS: u64 = 1_000_000;
 
-pub const MAX_AIRDROP_AMOUNT: u128 = 15_000 * ONE_TRTH;
+pub const MAX_AIRDROP_AMOUNT: u128 = 15_000 * ONE_TLKD;
 
 // Consensus defaults
 pub const BATCH_INTERVAL_MS: u64 = 200;
@@ -127,8 +126,8 @@ pub const NAME_VOTING_PERIOD: u64 = 432_000;
 pub const NAME_APPROVAL_THRESHOLD: u64 = 67;
 pub const TOKEN_AUTHORITY_APPROVAL_THRESHOLD: u64 = 67;
 
-pub const CU_PER_TRTH: u64 = 1_000_000;
-pub const MAX_CU_PER_TRTH: u64 = 1_000_000_000;
+pub const CU_PER_TLKD: u64 = 1_000_000;
+pub const MAX_CU_PER_TLKD: u64 = 1_000_000_000;
 
 // MCP storage key namespace
 pub const fn mcp_key(prefix: &[u8]) -> [u8; 32] {

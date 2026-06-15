@@ -52,7 +52,7 @@ fn make_state(validators: &[DualKeypair]) -> State {
             AccountRecord {
                 pubkey_bytes: pk.clone(),
                 balance: 1_000_000_000_000_000,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },
@@ -70,7 +70,7 @@ fn make_state(validators: &[DualKeypair]) -> State {
             AccountRecord {
                 pubkey_bytes: vec![],
                 balance: 1_000_000_000_000_000_000,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },

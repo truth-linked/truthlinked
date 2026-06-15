@@ -268,7 +268,7 @@ fn staking(
         );
     }
 
-    // staked-TRTH lock positions are stored inside the staking system cell.
+    // staked-TLKD lock positions are stored inside the staking system cell.
     // The CLI sends the locked amount as CallCell.value and the owner/term in calldata.
     if s == sel("lock") || s == sel("extend") || s == sel("unlock") {
         let Some(owner) = read32(cd, 4) else {

@@ -17,7 +17,7 @@ pub struct AccountRecord {
     pub pubkey_bytes: Vec<u8>,
     pub balance: u128,
     #[serde(default)]
-    pub compute_escrow_trth: u128,
+    pub compute_escrow_tlkd: u128,
     #[serde(default)]
     pub nonce: u64,
     pub nfts: Vec<[u8; 32]>,
@@ -266,7 +266,7 @@ pub struct StateDiff {
     pub name_fee: u128,
     pub cu_fee: u128,
     pub treasury_fee: u128,
-    pub compute_fee_trth: u128,
+    pub compute_fee_tlkd: u128,
     pub tx_hash: [u8; 32],
     pub tx_hashes: std::collections::HashSet<[u8; 32]>,
     pub pending_name_proposals: Vec<(String, PendingNameRegistration, AccountId, bool)>,
@@ -299,7 +299,7 @@ pub struct StateDiff {
     ///
     /// This is an audit field: balances are not credited here. The amount is
     /// represented by spent fee accumulators that are intentionally not paid to
-    /// validators or Staked TRTH holders.
+    /// validators or Staked TLKD holders.
     pub fee_burned: u128,
     pub is_system: bool,
     pub gas_breakdown: Vec<(String, u128)>,

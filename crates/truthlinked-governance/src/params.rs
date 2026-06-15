@@ -33,7 +33,7 @@ pub const PARAM_GAS_ORACLE_QUEUE: &str = "gas.oracle_queue";
 pub const PARAM_GAS_PRICE: &str = "gas.price";
 pub const PARAM_GAS_DISTRIBUTION_INTERVAL: &str = "gas.distribution_interval";
 
-pub const PARAM_EMISSION_YEAR1_TRTH: &str = "emission.year1_trth";
+pub const PARAM_EMISSION_YEAR1_TLKD: &str = "emission.year1_tlkd";
 pub const PARAM_EMISSION_DECAY_BPS_PER_YEAR: &str = "emission.decay_bps_per_year";
 pub const PARAM_EMISSION_EPOCH_BLOCKS: &str = "emission.epoch_blocks";
 
@@ -91,7 +91,7 @@ pub const PARAM_NAME_EXPIRATION_BLOCKS: &str = "name.expiration_blocks";
 pub const PARAM_NAME_VOTING_PERIOD: &str = "name.voting_period";
 pub const PARAM_NAME_APPROVAL_THRESHOLD: &str = "name.approval_threshold";
 pub const PARAM_TOKEN_AUTHORITY_APPROVAL_THRESHOLD: &str = "token.authority_approval_threshold";
-pub const PARAM_CU_PER_TRTH: &str = "cu.per_trth";
+pub const PARAM_CU_PER_TLKD: &str = "cu.per_tlkd";
 
 pub const PARAM_ORACLE_COMMIT_QUORUM_PERCENT: &str = "oracle.commit_quorum_percent";
 pub const PARAM_ORACLE_REVEAL_QUORUM_PERCENT: &str = "oracle.reveal_quorum_percent";
@@ -245,14 +245,14 @@ const MIN_HTTP_TIMEOUT_MS: u64 = 100;
 const MAX_HTTP_TIMEOUT_MS: u64 = 60_000;
 const MIN_AIRDROP_COOLDOWN_SECS: u64 = 3_600;
 const MAX_AIRDROP_COOLDOWN_SECS: u64 = 7 * 24 * 3_600;
-const MIN_AIRDROP_AMOUNT: u128 = constants::ONE_TRTH;
-const MAX_AIRDROP_AMOUNT: u128 = 100_000 * constants::ONE_TRTH;
-const MIN_NAME_FEE: u128 = constants::ONE_TRTH / 10;
-const MAX_NAME_FEE: u128 = 1_000 * constants::ONE_TRTH;
-const MIN_URL_PROPOSAL_BOND: u128 = constants::ONE_TRTH;
-const MAX_URL_PROPOSAL_BOND: u128 = 1_000 * constants::ONE_TRTH;
-const MIN_RAW_URL_PROPOSAL_BOND: u128 = 5 * constants::ONE_TRTH;
-const MAX_RAW_URL_PROPOSAL_BOND: u128 = 10_000 * constants::ONE_TRTH;
+const MIN_AIRDROP_AMOUNT: u128 = constants::ONE_TLKD;
+const MAX_AIRDROP_AMOUNT: u128 = 100_000 * constants::ONE_TLKD;
+const MIN_NAME_FEE: u128 = constants::ONE_TLKD / 10;
+const MAX_NAME_FEE: u128 = 1_000 * constants::ONE_TLKD;
+const MIN_URL_PROPOSAL_BOND: u128 = constants::ONE_TLKD;
+const MAX_URL_PROPOSAL_BOND: u128 = 1_000 * constants::ONE_TLKD;
+const MIN_RAW_URL_PROPOSAL_BOND: u128 = 5 * constants::ONE_TLKD;
+const MAX_RAW_URL_PROPOSAL_BOND: u128 = 10_000 * constants::ONE_TLKD;
 const MAX_SCHEMA_KEYS: u64 = 64;
 const MAX_SCHEMA_KEY_BYTES: u64 = 64;
 const MAX_SCHEMA_VOTING_PERIOD_BLOCKS: u64 = 1_000_000;
@@ -280,7 +280,7 @@ const PINNED_PARAMS: &[&str] = &[
     PARAM_GAS_ORACLE_QUEUE,
     PARAM_GAS_PRICE,
     PARAM_GAS_DISTRIBUTION_INTERVAL,
-    PARAM_EMISSION_YEAR1_TRTH,
+    PARAM_EMISSION_YEAR1_TLKD,
     PARAM_EMISSION_DECAY_BPS_PER_YEAR,
     PARAM_EMISSION_EPOCH_BLOCKS,
     PARAM_BATCH_INTERVAL_MS,
@@ -332,7 +332,7 @@ const PINNED_PARAMS: &[&str] = &[
     PARAM_NAME_VOTING_PERIOD,
     PARAM_NAME_APPROVAL_THRESHOLD,
     PARAM_TOKEN_AUTHORITY_APPROVAL_THRESHOLD,
-    PARAM_CU_PER_TRTH,
+    PARAM_CU_PER_TLKD,
     PARAM_ORACLE_COMMIT_QUORUM_PERCENT,
     PARAM_ORACLE_REVEAL_QUORUM_PERCENT,
     PARAM_ORACLE_REQUEST_TIMEOUT_BLOCKS,
@@ -382,9 +382,9 @@ const PARAM_SPECS: &[ParamSpec] = &[
         30 * constants::TREASURY_DISTRIBUTION_INTERVAL_BLOCKS,
     ),
     spec_u128(
-        PARAM_EMISSION_YEAR1_TRTH,
-        1_000_000 * constants::ONE_TRTH,
-        100_000_000 * constants::ONE_TRTH,
+        PARAM_EMISSION_YEAR1_TLKD,
+        1_000_000 * constants::ONE_TLKD,
+        100_000_000 * constants::ONE_TLKD,
     ),
     spec_u64(PARAM_EMISSION_DECAY_BPS_PER_YEAR, 500, 5_000),
     spec_u64(PARAM_EMISSION_EPOCH_BLOCKS, 43_200, 4_320_000),
@@ -550,7 +550,7 @@ const PARAM_SPECS: &[ParamSpec] = &[
     ),
     spec_u128(
         PARAM_STORAGE_RENT_LIFETIME_FEE,
-        constants::ONE_TRTH,
+        constants::ONE_TLKD,
         U128_MAX,
     ),
     spec_u64(PARAM_STORAGE_RENT_GRACE_PERIOD_BLOCKS, 1, U64_MAX),
@@ -573,7 +573,7 @@ const PARAM_SPECS: &[ParamSpec] = &[
     spec_u64(PARAM_NAME_VOTING_PERIOD, 10_000, 10_000_000),
     spec_u64(PARAM_NAME_APPROVAL_THRESHOLD, 51, PERCENT_MAX),
     spec_u64(PARAM_TOKEN_AUTHORITY_APPROVAL_THRESHOLD, 51, PERCENT_MAX),
-    spec_u64(PARAM_CU_PER_TRTH, 1_000, constants::MAX_CU_PER_TRTH),
+    spec_u64(PARAM_CU_PER_TLKD, 1_000, constants::MAX_CU_PER_TLKD),
     spec_u64(
         PARAM_ORACLE_COMMIT_QUORUM_PERCENT,
         MIN_ORACLE_QUORUM,
@@ -743,8 +743,8 @@ pub fn insert_genesis_params<S: ParamState>(state: &mut S) {
     );
     insert_u128(
         state,
-        PARAM_EMISSION_YEAR1_TRTH,
-        25_000_000 * constants::ONE_TRTH,
+        PARAM_EMISSION_YEAR1_TLKD,
+        25_000_000 * constants::ONE_TLKD,
     );
     insert_u64(state, PARAM_EMISSION_DECAY_BPS_PER_YEAR, 2_000);
     insert_u64(state, PARAM_EMISSION_EPOCH_BLOCKS, 432_000);
@@ -1015,7 +1015,7 @@ pub fn insert_genesis_params<S: ParamState>(state: &mut S) {
         PARAM_TOKEN_AUTHORITY_APPROVAL_THRESHOLD,
         constants::TOKEN_AUTHORITY_APPROVAL_THRESHOLD,
     );
-    insert_u64(state, PARAM_CU_PER_TRTH, constants::CU_PER_TRTH);
+    insert_u64(state, PARAM_CU_PER_TLKD, constants::CU_PER_TLKD);
 
     insert_u64(
         state,
@@ -1208,7 +1208,7 @@ pub fn validate_param_value(key: &[u8; 32], value: [u8; 32]) -> Result<(), Strin
     let k_max_gas = param_key(PARAM_MAX_GAS_PER_TX);
     let k_max_calldata = param_key(PARAM_MAX_CALLDATA_SIZE);
     let k_max_chain_calldata = param_key(PARAM_MAX_CALL_CHAIN_TOTAL_CALLDATA);
-    let k_cu_per_trth = param_key(PARAM_CU_PER_TRTH);
+    let k_cu_per_tlkd = param_key(PARAM_CU_PER_TLKD);
     if key == &k_max_gas && v64 > constants::MAX_GAS_PER_TX {
         return Err("max_gas_per_tx exceeds hard cap".to_string());
     }
@@ -1218,8 +1218,8 @@ pub fn validate_param_value(key: &[u8; 32], value: [u8; 32]) -> Result<(), Strin
     if key == &k_max_chain_calldata && v64 > constants::MAX_CALL_CHAIN_TOTAL_CALLDATA as u64 {
         return Err("max_call_chain_total_calldata exceeds hard cap".to_string());
     }
-    if key == &k_cu_per_trth && v64 > constants::MAX_CU_PER_TRTH {
-        return Err("cu_per_trth exceeds hard cap".to_string());
+    if key == &k_cu_per_tlkd && v64 > constants::MAX_CU_PER_TLKD {
+        return Err("cu_per_tlkd exceeds hard cap".to_string());
     }
     Ok(())
 }

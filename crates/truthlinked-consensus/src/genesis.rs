@@ -8,7 +8,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::path::Path;
 use truthlinked_core::cells::StorageKeySpec;
-use truthlinked_core::constants::ONE_TRTH;
+use truthlinked_core::constants::ONE_TLKD;
 use truthlinked_core::constants::STORAGE_RENT_GRACE_PERIOD_BLOCKS;
 use truthlinked_core::pq_execution::{system_authority_id, treasury_system_cell_id};
 use truthlinked_core::pq_identity::{account_id_from_pubkey, DualKeypair};
@@ -17,7 +17,7 @@ use truthlinked_runtime::types::AccountRecord;
 use truthlinked_state::constants::TOTAL_SUPPLY;
 use truthlinked_state::State;
 
-const FOUNDATION_MINT_PUBKEY_HEX: &str = "decbc4bd14caba575328a0ddcfb633009e2ca6058085a9b404753dac5b8d98f11b3650d866f01d14914087498d87970cdd4ebcc5afa76989d15ab816a74cbe7ab44cbca9cd7484a62f4507e23cbc425e1a937b3f00588af9a4d55e278a678075e6e99401612508b1b35856a89a4b1241c50cc32b5863483913d72ac70a6b0764774fad57a0135c2a7c0756ecf8fd7ca6c56bf20ea86c3c5049fb988c6c3240b32d2e08cefccd1f4cd1b8286cbce04ac53b2c2d637a8ed4d2aa7f464fd8ecbad9001b531b7a2e499769059ad701fcdbe905829bace71b9c612ab5d787f526f4c94c7f385eff033433a9747598155e705afecc5136878a260aedda8afddb9564edbc103fca3b302f114048072b549bfc2eccd466243aa8b9edb6ec31cf2fba2e78d69ee77c848322883aec63f33e63363c6f44f8eccdce936e482b89f036e45ac154a1449547f6ba247ab1a953f5ecfb462ec690f5487fea88996bf9bd8de8a6478bc52360355dabc050f1d00a956ea15bd55a50621405ad5e1d5e32d95566994905ffa15dea19920830f9b3d96959182fe04102a67c90dc5cc499af5c59bc011f1b68b8119168ad0bacb22f088ce15c5de2b36fafb328266dccca6f0806c84cc07311bc86d5008bdc95d35c7f54bcb03da196301f7d03cbf7083f9fef89d49c4f26b4b3ab2cc3eeb19938fcb937f30a11b0ae0b2a57748c8a0cfb70be082b1a32d80a9593c51e289e45280b7ae7e0bce690e64dba637648480ddfd4348df1e6a2eface8c6dc6c56f8f65b4dd9eb7db507d1949ada2ad69a73130ae66ada35b78c725bad4b2b9576e0a3b612d75076b7db61481d93e7208db731a03fbe79d2f4fac5960588ffb077e2b45cc0ed8d36e36aac2fa91409b966368f5b00b1ce7ae88b8ed0613e1ae15435b9da407192da122888c196586ad3b9734198ff3f6c27c4c2fc0806886fdb635fc8d7a87a163643d377dd6a104fbed2fae4248d8c5c6cdf49a663193c18bacca954531c42d68e2ae0a1117647bb772f921d6d52a2277d40a3339f8193799858907d80e8a997278b5c0b99b3424badd9bf569cafbd24e1e60dc1878d4609c09d046d000da5d4719571c5b2c3643ffba85c085233d1d1cbc58dfd31bfb23de9ef38ffab3aa56e4818394692e558c7720dc09feac8d66e51102df60d38dbeade04870e0341f482eb51faaf34b3a93118e69d5fa8449aeef127b6bd137e532045bb0042a4b1ff53aa066648c9da516269b0d4486a2b13338ba72274b67dcfee807b8cbc1d822a5110c69a91b9b8c6b450b759d56e17eaccb3bae71993a8a787262a3eef25aa8586f1c59f708493375a5eeb988628472c93cb8fe8d5f45bf19649532a05b28122885ea4b54e2fc7c42a3278c6b0311918a1c2567a6ac77edfcc981294c3d6dde9973fa5b670080830a96a192fd27764662ea0c853895c9255fc244395a4704aec9a957f2d0a2acf8b11b19bca6d107c2cec5d5b547d02915b35757a29a0470a380b2f2728fc917dfedbefa4aab2792a14cf69fe606307d7cdb93b885a958a9705858efdc0831ca591771174f0b03a55f8cce968f6622a95a293a5199175b61167b327a9a8bc17a62b1d4b7aea7ea766c847167a53da2a6e5c6e96d275ed3c0d7e45504a20fb4e2895ec4dba76251b9c200b8f4e163bd97e18b7fd5162ffb26f1fddb277422268722da3505b6d3638551895d17e0f14697a1543246f1b975e52cc2fe355569ceacfaf6dc32a971441100f7750cfc43288cb0ddee4db770e3dbc70997f7c653ec8cf553bb5c2b48dafdf586a1734cb06e63b20b75e3d7c2101235bbbcc7bc49b1f7623dc5b18481fd47a4df78a10056011d57b271075051eaccf4aef4d9f521d9792d4c445800b52894d2d0c84796fa2097feb824283672df0e679c66107ecf32d01861ab204c80565fb819b132b8a7f681fd89561beb32d3505afdbd98b05234f911f0c08500ad0e814d9cd585d3e3a2f3dfb20504ce26ec248db78acfd1af5d490c53f483ab13b67774f763314127f51778aac984d00e69c31d115da5b11a114a256eb7215ccf59e57cd46c78ad33234c38a1e464088ba0298e18079956d4a36c809b1a09e9a6d00395740423056efeab6fab69d211a68da95f70a715b93ef2ce9199af43d6d24960eefec6e2fe4dc0ce0bfd216f1e4fc9852755c0034e1f302cb9229d3a1fe68e3d77561cb5a92b4174761ca8a8dcfedd47133d79bef6d6417a2cab6e888a6959ae52a07b0615f00221b9bad0c505fbdd4e17443eebad8283e71ab90069f3ca6088121f4656dc9866d430d39c71815510cad710310ffdaf46db747b633c26c7b6933355df47def6492374c88c149882db13ba1ff2ce10f29b71b1abf5c4b5dd057ed6c3dde70b9ab94e754efb0a160c5429f16303d55d7f7570c21a790d5a63cc6acc79d584f32ddeaa772da5780a4f73c6d08ae7d9dd22855898fec3b9caae003d83b3fb329a2f3c540d02adcca9b39568cd3855029da05ac20fd92d3deafd04103ade91d5dfc045522c4122747a81381e740035a6c7f3a874c3a8da6af99e1177002460836110a5115376e2f11f6a9a947b68ad944d4e0a04214264fc760974132220af99a72e0d7f100419cc1bcdf2897c7a42c388b47f2b2019920d23a0c629775b5b642d1554d956359805f474aad99ebbc5f74e0dc7af94f87896fca0e433ea62400ee5b8f2b2d678cc4ae7eb3e1b6456dd07ddff6b3bca52a220f594133bf36bc8a4dbf";
+const FOUNDATION_MINT_PUBKEY_HEX: &str = "cc3e65bd89c24875f2bcf3ef14d34ecea14404ca79565ce237ebf45005a22bcda4a75dd99c2fdedcf5cb108105c790aa27e9174afe8e49e122a826d6b2ab457ae9f4f784b41f4d3afadb88dfb26ead96e1caf8b6c5442f7d94ac9d2c96894a7033ac447ce635ed9cfef4765ead4df7513dfd976341a37c9e3de2d18d581abac831adbec7e5277a5f45efeb5e9761a3288d08af1f571722f0f928bd8c495f59f69774297b89d7ddce10fd4bdc5495d2c3e297e7c170b36bf206a6de1e6e0787b86695b7f3683eb9bd808244256a1e8e41aebd341f10b5d83e21aaa11e28fdd7cd7073d1aa8f3c454acfc82152d1f651923b27c222ea9cedaadb0e19d424d1f83e216265fc90613d5981ccd3adc2d50e2825dc2a42c3f713c8018294910282a8b508c2381fb456acb7a3262528e63dff1a7c741fd6e1d515a89226705a2b2b25a00cd9d24cb5b362523c439e48b3516d09fe3465129d5e181a9958babd167aad0af3ee971967979804102b9969f1124ed288003c2ceeec18bfe0c2e97c2b5288d28a86b2c72d8bb79bfca95d4147333637c5e52aacc2ee0342a02b6bd2f8ed6b3970ed977010265e8adbd750da34ef6efb255d98174e42cfbbd37cf167fbcffcf3a94e60311f5b8cb4038ffa5634fb180fd18752c24f8b5388a2cfbae1751e28f0274d02fe7120cd9e74e7760761dde46bd7d3f66d23246cb01127e8499b1d9652ffb6e1becabaa7a773900162699d8315bca40e2bdabe157fa38938bb7350bfdc9f314d501437b87e1a81eb6e99201f9bcb5a67e39210940b9fc86a60ca6ee9a67dd771b2eb62f4ab2e4b48ab46946fe2c205a35ceb6159ac5c3f089d28f34bb5c4a835da7e36a18059034fecc341d04a6bb5e1d64d001eceba0b5a98f5c04a47e7a4e8a489429677141d1276156b853ac8bbdb7b35fd01592101f507c28569f052541d5421bc5fdedfcd978d4be7fc3faa3e6fcf9e5b458d53fb5fd4d8ed229085725e551c7bbfafe0068cc23d68a119854952b2883a1d4c8110a11f3f9f2c77e5f6a8b6f7f83ddfb745d5cb6ca84def1caf77d8cf5f78583850010a1bc1cc3044e82effe42caa9d6ca3395872e0254fef1947c8e2a74454ede3e93a3f12741d4a14514745b8f40f51d05c43e85e8542b41e5977f947bc4d4ff57e1ee687a674cfd5a1a1154d11e0c406857d802d096ef46bd8fb535cde8a97e8a6fa71658be9a9489e936bd3c8e9f5a21548aa0f71659a2e2a577d7b9351ee55642c2dcad5eed9c1f2d5051f17d9daa5adabd287de2a0a29d8c8343921a6a3d94c5e190c773f410fc51091c496eb4c7905ffbaaf942195cb9c60183a5602413ef4abeeb36258d0f1a3caa1b3516c8bdef2c5c6e3b7ab7b87f45c7994136c832e3c7e7590edb227bb9100d96ee05410a27eca7e398a92e601a435fc82450e9bb7b215b21db37a1fad8adf9614c6dfe474ae5118b0e69faf22fc78e63a362308644ae03b648a62e7991e9f56177c508f67c4a70cd0a783886afbec6869fcd734bce51c66134e831df369c70f6b8514b9a01d930010fcb946cc9217534ae86b038d53d7b67bf524835cb868aaf44f2e97f1394c462295863be3795ddf46b4e3b1b9971ecb8eabe58095b50614704bb804203e15dc981ef67cd6f14858d2d97ea175f3ff5cf7d910a045825c8e9eb4d7924bfb91b5bf770a18fd3cfb01d6e01e84c7960964b546e692b5d1568b57f5a1a7085c60cdab8575ae4ce23b12749e9c3e9a6bc3068735121ae1048306f10319cb676c3fa7e8e19dd66defd2878dd2f02b4823628e761169079b4a1b0e9b28f9874d1747a7a3bead82310475278994882fc638287a943939d2632e07f68bb528fdd437c33254c6fbc8f0702cc602eace460bee121561f57e7c775f434728a72c9a4958f4cea69d2dfc4ab2a7b0632eba06532b09590883732588bd055372822d711c81da7aca714991d1994225f6ee75bd400956c4f66ab26665127dc30c205693fc2ded471447bbc0260258783a433d50a014adbe3b78d6b4afc9204f4e4dbca85fe06801ed7f9f8a31a465fdc3fa0060e80b2c9179da5463285368ed5374a79e39b3add06c4c8af310a9b80358189895b20e4f7a4c7e701ba32a6f580e0b60aaf70771716fffb84a176a268135e8ddee2f477a23a47dabeba9067dbb20b59adc59ec0e0e648e31238a66f737e0d87d0a2acf6f92587e22f703de242ed9399b347659d80cf1b6fae4d0f54004ef4832b7d127b7d055785fe5652980f6f2e28b104668213b65063bc341ba92824a40a0c64826b0f58257a900b78f4c2959abacd5969f5353648ed7835012c13bed9d7b9c9f9c6008f44c7c1eeef14f0654f6f0cf76dec9b85a0d6534f8d86b1e89718cb851174857e71da21d2b5c849f7888a16c60df8c6e339325302ef16c6008b405a1f88dfcba72fe239010485e95cce74c9d50a07fe0983dab626935a3ca3921da0036acf21a08f6226e59feecc0089bf1bad7d53e984a4c7d26df645a3ccb0b33a1e61e5408ba1e7e4e86386db261bef8ec58d07499bce4e465310ef2d3701699c68c4142156ecfaabef3f13bcb39ae7627ac1f44f526136411ecffa9d05f639cbaa4e1e366eea8d3032612c7b2fb75e33af5b4828d682347d0a912ca1ca0d66abde1ca06f247ba182f85d6a2eddf1fca4d7f21a2399a2831dc085fd0ed3140b6a10eb13affb4eeac31b01640c3b4c1976f99bcabc15d36afe4cf25fa5506ba31da9d8dad73fd7358";
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GenesisValidator {
     pub keys_file: String,
@@ -53,15 +53,15 @@ impl GenesisConfig {
             validators: vec![
                 GenesisValidator {
                     keys_file: "validator1_keys.json".to_string(),
-                    allocation: 100_000 * ONE_TRTH,
+                    allocation: 100_000 * ONE_TLKD,
                 },
                 GenesisValidator {
                     keys_file: "validator2_keys.json".to_string(),
-                    allocation: 100_000 * ONE_TRTH,
+                    allocation: 100_000 * ONE_TLKD,
                 },
                 GenesisValidator {
                     keys_file: "validator3_keys.json".to_string(),
-                    allocation: 100_000 * ONE_TRTH,
+                    allocation: 100_000 * ONE_TLKD,
                 },
             ],
             foundation_mint_pubkey: None,
@@ -75,15 +75,15 @@ impl GenesisConfig {
             validators: vec![
                 GenesisValidator {
                     keys_file: "validator1_keys.json".to_string(),
-                    allocation: 50_000 * ONE_TRTH,
+                    allocation: 50_000 * ONE_TLKD,
                 },
                 GenesisValidator {
                     keys_file: "validator2_keys.json".to_string(),
-                    allocation: 70_000 * ONE_TRTH,
+                    allocation: 70_000 * ONE_TLKD,
                 },
                 GenesisValidator {
                     keys_file: "validator3_keys.json".to_string(),
-                    allocation: 80_000 * ONE_TRTH,
+                    allocation: 80_000 * ONE_TLKD,
                 },
             ],
             foundation_mint_pubkey: None,
@@ -133,7 +133,7 @@ pub fn initialize_genesis(state: &mut State, config: &GenesisConfig) {
             AccountRecord {
                 pubkey_bytes: dilithium_pubkey.clone(),
                 balance: liquid_amount,
-                compute_escrow_trth: 0,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },
@@ -149,7 +149,7 @@ pub fn initialize_genesis(state: &mut State, config: &GenesisConfig) {
         tracing::info!(
             "   Validator {}: {} TLKD ({}% staked, {}% liquid) ({})",
             idx + 1,
-            validator.allocation / ONE_TRTH,
+            validator.allocation / ONE_TLKD,
             80,
             20,
             hex::encode(&account_id[..8])
@@ -167,7 +167,7 @@ pub fn initialize_genesis(state: &mut State, config: &GenesisConfig) {
         AccountRecord {
             pubkey_bytes: pk.clone(),
             balance: 0,
-            compute_escrow_trth: 0,
+            compute_escrow_tlkd: 0,
             nonce: 0,
             nfts: vec![],
         },
@@ -280,15 +280,15 @@ pub fn initialize_genesis(state: &mut State, config: &GenesisConfig) {
     if total_allocation != total_supply {
         panic!(
             "Genesis allocation mismatch: allocated {} vs supply {}",
-            total_allocation / ONE_TRTH,
-            total_supply / ONE_TRTH
+            total_allocation / ONE_TLKD,
+            total_supply / ONE_TLKD
         );
     }
 
     tracing::info!(
         " Genesis initialized: {} validators + treasury reserve = {} TLKD total supply",
         config.validators.len(),
-        total_allocation / ONE_TRTH
+        total_allocation / ONE_TLKD
     );
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "truthlinked-axiom-compiler"
-version = "0.2.0"
+version = "0.1.3"
 edition = "2021"
 authors = ["TruthLinked Labs <dev@truthlinked.org>"]
 description = "Compiler for the .cell language. Transforms high-level cell source into Axiom bytecode and manifests for the TruthLinked post-quantum blockchain."
@@ -18,7 +18,7 @@ name = "axiom-cc"
 path = "src/main.rs"
 
 [dependencies]
-truthlinked-sdk = "0.2.0"
+truthlinked-sdk = { path = "../truthlinked-sdk" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"

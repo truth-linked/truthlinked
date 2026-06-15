@@ -94,12 +94,12 @@ pub enum TransactionIntent {
     WithdrawCompute {
         amount: u128,
     },
-    /// Wrap TRTH into wTRTH (1:1). Deducts TRTH, mints wTRTH token balance.
-    WrapTRTH {
+    /// Wrap TLKD into wTLKD (1:1). Deducts TLKD, mints wTLKD token balance.
+    WrapTLKD {
         amount: u128,
     },
-    /// Unwrap wTRTH back to TRTH (1:1). Burns wTRTH token balance, credits TRTH.
-    UnwrapTRTH {
+    /// Unwrap wTLKD back to TLKD (1:1). Burns wTLKD token balance, credits TLKD.
+    UnwrapTLKD {
         amount: u128,
     },
     Stake {
