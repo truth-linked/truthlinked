@@ -129,7 +129,7 @@ fn resolve_rpc(cli: &Cli, config: Option<&CliConfig>) -> String {
     if let Some(rpc) = config.and_then(|c| c.rpc.as_ref()) {
         return rpc.clone();
     }
-    "https://devnet.truthlinked.org".to_string()
+    "https://testnet.truthlinked.org".to_string()
 }
 
 fn resolve_output(cli: &Cli) -> OutputFormat {
@@ -653,9 +653,9 @@ impl Network {
     fn default_rpc(self) -> &'static str {
         match self {
             Network::Local => "http://localhost:19944",
-            Network::Devnet => "https://devnet.truthlinked.org",
-            Network::Testnet => "https://devnet.truthlinked.org",
-            Network::Mainnet => "https://devnet.truthlinked.org",
+            Network::Devnet => "https://testnet.truthlinked.org",
+            Network::Testnet => "https://testnet.truthlinked.org",
+            Network::Mainnet => "https://mainnet.truthlinked.org",
         }
     }
 }
@@ -989,9 +989,9 @@ enum Commands {
         #[arg(long)]
         passphrase: Option<String>,
     },
-    /// Claim devnet faucet funds.
+    /// Claim testnet faucet funds.
     ///
-    /// Submits a signed faucet request with a 15,000 TLKD devnet limit.
+    /// Submits a signed faucet request with a 15,000 TLKD testnet limit.
     Faucet {
         /// Signing keyfile or config file (defaults to ./axiom/config, config, or ~/.truthlinked/default.keys).
         #[arg(long, short = 'f', value_name = "KEYFILE")]
@@ -4210,14 +4210,14 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 return Err("Amount must be > 0".into());
             }
             if amount_raw > constants::MAX_AIRDROP_AMOUNT {
-                return Err("Faucet amount exceeds devnet maximum (15,000 TLKD)".into());
+                return Err("Faucet amount exceeds testnet maximum (15,000 TLKD)".into());
             }
 
             let genesis_hash = fetch_genesis_hash(&client, &rpc, cli.retries)?;
             let genesis_hash_hex = hex::encode(genesis_hash);
             let is_local_rpc = rpc.contains("localhost") || rpc.contains("127.0.0.1");
             if genesis_hash[0..4] != [0, 0, 0, 0] && !is_local_rpc {
-                return Err("Faucet is only available on devnet".into());
+                return Err("Faucet is only available on testnet".into());
             }
 
             let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();

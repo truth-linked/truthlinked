@@ -2,7 +2,7 @@
 name = "axiom-cli"
 authors = ["TruthLinked Labs <Donatus@truthlinked.org>"]
 description = "TruthLinked command-line interface for accounts, cells, validators, governance, MCP, and SDK workflows."
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
