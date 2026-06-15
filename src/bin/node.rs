@@ -2,7 +2,7 @@
 use clap::Parser;
 use std::sync::Arc;
 use truthlinked_consensus::streaming_consensus::StreamingConsensus;
-use truthlinked_core::constants::ONE_TRTH;
+use truthlinked_core::constants::ONE_TLKD;
 use truthlinked_core::DualKeypair;
 use truthlinked_net::ingress::IngressServer;
 
@@ -94,7 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .find(|v| v.keys_file == args.validator_keys)
             .map(|v| v.allocation)
             .or_else(|| genesis_config.validators.first().map(|v| v.allocation))
-            .unwrap_or(100_000 * ONE_TRTH);
+            .unwrap_or(100_000 * ONE_TLKD);
         genesis_config.validators = vec![truthlinked_consensus::genesis::GenesisValidator {
             keys_file: args.validator_keys.clone(),
             allocation,

@@ -424,7 +424,7 @@ async fn handle_rpc_message(
                     return ok_response(
                         id,
                         serde_json::json!({
-                            "content": [{ "type": "text", "text": truthlinked_state::trth::format_amount(bal) }]
+                            "content": [{ "type": "text", "text": truthlinked_state::token::format_amount(bal) }]
                         }),
                     );
                 }

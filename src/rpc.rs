@@ -291,10 +291,10 @@ async fn token_info(
         mint: "native".to_string(),
         name: truthlinked_state::constants::TOKEN_NAME.to_string(),
         symbol: truthlinked_state::constants::TOKEN_SYMBOL.to_string(),
-        total_supply: truthlinked_state::trth::format_amount(
+        total_supply: truthlinked_state::token::format_amount(
             truthlinked_state::constants::TOTAL_SUPPLY,
         ),
-        circulating_supply: truthlinked_state::trth::format_amount(cache.circulating_supply),
+        circulating_supply: truthlinked_state::token::format_amount(cache.circulating_supply),
         holder_count: cache.holder_count,
         decimals: truthlinked_state::constants::TOKEN_DECIMALS,
         subunit: truthlinked_state::constants::TOKEN_SUBUNIT.to_string(),
@@ -318,7 +318,6 @@ struct GasScheduleResponse {
     max_gas_per_batch: u64,
     mempool_max_bytes: u64,
     cu_per_tlkd: u64,
-    cu_per_trth: u64,
     name_registration_fee: String,
     name_renewal_fee: String,
     storage_rent_lifetime_fee: String,
@@ -408,8 +407,7 @@ async fn gas_schedule() -> Json<GasScheduleResponse> {
         max_gas_per_tx: gp::get_u64(gp::PARAM_MAX_GAS_PER_TX),
         max_gas_per_batch: gp::get_u64(gp::PARAM_MAX_GAS_PER_BATCH),
         mempool_max_bytes: gp::get_u64(gp::PARAM_MEMPOOL_MAX_BYTES),
-        cu_per_tlkd: gp::get_u64(gp::PARAM_CU_PER_TRTH),
-        cu_per_trth: gp::get_u64(gp::PARAM_CU_PER_TRTH),
+        cu_per_tlkd: gp::get_u64(gp::PARAM_CU_PER_TLKD),
         name_registration_fee: gp::get_u128(gp::PARAM_NAME_REGISTRATION_FEE).to_string(),
         name_renewal_fee: gp::get_u128(gp::PARAM_NAME_RENEWAL_FEE).to_string(),
         storage_rent_lifetime_fee: gp::get_u128(gp::PARAM_STORAGE_RENT_LIFETIME_FEE).to_string(),
@@ -442,13 +440,13 @@ struct FeeDistributionResponse {
     pending_total_revenue: FeeBucketResponse,
     accumulated_gas_fees: FeeBucketResponse,
     accumulated_name_fees: FeeBucketResponse,
-    accumulated_compute_fees_trth: FeeBucketResponse,
+    accumulated_compute_fees_tlkd: FeeBucketResponse,
     accumulated_treasury_fees: FeeBucketResponse,
     split: std::collections::BTreeMap<String, FeeDistributionSplitResponse>,
 }
 
 fn fee_bucket(amount: u128) -> FeeBucketResponse {
-    let formatted = truthlinked_state::trth::format_amount(amount);
+    let formatted = truthlinked_state::token::format_amount(amount);
     FeeBucketResponse {
         units: amount.to_string(),
         tlkd: formatted.clone(),
@@ -457,7 +455,7 @@ fn fee_bucket(amount: u128) -> FeeBucketResponse {
 }
 
 fn fee_split(name_bps: u128, amount: u128) -> FeeDistributionSplitResponse {
-    let formatted = truthlinked_state::trth::format_amount(amount);
+    let formatted = truthlinked_state::token::format_amount(amount);
     FeeDistributionSplitResponse {
         bps: name_bps,
         units: amount.to_string(),
@@ -485,7 +483,7 @@ async fn fee_distribution(
     let protocol_revenue = state
         .accumulated_gas_fees
         .saturating_add(state.accumulated_name_fees)
-        .saturating_add(state.accumulated_compute_fees_trth);
+        .saturating_add(state.accumulated_compute_fees_tlkd);
     let treasury_revenue = state.accumulated_treasury_fees;
     let total_revenue = protocol_revenue.saturating_add(treasury_revenue);
 
@@ -524,7 +522,7 @@ async fn fee_distribution(
         pending_total_revenue: fee_bucket(total_revenue),
         accumulated_gas_fees: fee_bucket(state.accumulated_gas_fees),
         accumulated_name_fees: fee_bucket(state.accumulated_name_fees),
-        accumulated_compute_fees_trth: fee_bucket(state.accumulated_compute_fees_trth),
+        accumulated_compute_fees_tlkd: fee_bucket(state.accumulated_compute_fees_tlkd),
         accumulated_treasury_fees: fee_bucket(state.accumulated_treasury_fees),
         split,
     })
@@ -729,8 +727,8 @@ async fn mempool(
             TransactionIntent::SubmitOracleCommit { .. } => "oracle_commit",
             TransactionIntent::SubmitOracleReveal { .. } => "oracle_reveal",
             TransactionIntent::SetCellVisibility { .. } => "set_cell_visibility",
-            TransactionIntent::WrapTRTH { .. } => "wrap_tlkd",
-            TransactionIntent::UnwrapTRTH { .. } => "unwrap_tlkd",
+            TransactionIntent::WrapTLKD { .. } => "wrap_tlkd",
+            TransactionIntent::UnwrapTLKD { .. } => "unwrap_tlkd",
         }
         .to_string();
         if let Some(filter) = &filter {
@@ -814,13 +812,10 @@ struct BalanceResponse {
     account_id: String,
     balance: String,
     balance_tlkd: String,
-    balance_trth: String,
-    compute_escrow_trth: String,
+    compute_escrow_tlkd: String,
     compute_escrow_tlkd_formatted: String,
-    compute_escrow_trth_formatted: String,
     staking_balance: String,
     staking_balance_tlkd: String,
-    staking_balance_trth: String,
 }
 
 #[derive(Serialize)]
@@ -844,8 +839,7 @@ struct AccountInfoResponse {
     found: bool,
     balance: String,
     balance_tlkd: String,
-    balance_trth: String,
-    compute_escrow_trth: String,
+    compute_escrow_tlkd: String,
     nonce: u64,
     replay_protection: String,
     code_hash: Option<String>,
@@ -1004,27 +998,24 @@ fn build_balance_response(
         .get(account_id_arr)
         .map(|acc| acc.balance)
         .unwrap_or(0);
-    let compute_escrow_trth = state
+    let compute_escrow_tlkd = state
         .accounts
         .get(account_id_arr)
-        .map(|acc| acc.compute_escrow_trth)
+        .map(|acc| acc.compute_escrow_tlkd)
         .unwrap_or(0);
     let staking_balance = state.staking_balance_of(account_id_arr).unwrap_or(0);
-    let balance_formatted = truthlinked_state::trth::format_amount(balance);
-    let compute_escrow_formatted = truthlinked_state::trth::format_amount(compute_escrow_trth);
+    let balance_formatted = truthlinked_state::token::format_amount(balance);
+    let compute_escrow_formatted = truthlinked_state::token::format_amount(compute_escrow_tlkd);
     let staking_balance_formatted =
-        truthlinked_state::trth::format_amount(staking_balance as u128);
+        truthlinked_state::token::format_amount(staking_balance as u128);
     BalanceResponse {
         account_id: account_id_hex,
         balance: balance.to_string(),
-        balance_tlkd: balance_formatted.clone(),
-        balance_trth: balance_formatted,
-        compute_escrow_trth: compute_escrow_trth.to_string(),
-        compute_escrow_tlkd_formatted: compute_escrow_formatted.clone(),
-        compute_escrow_trth_formatted: compute_escrow_formatted,
+        balance_tlkd: balance_formatted,
+        compute_escrow_tlkd: compute_escrow_tlkd.to_string(),
+        compute_escrow_tlkd_formatted: compute_escrow_formatted,
         staking_balance: staking_balance.to_string(),
-        staking_balance_tlkd: staking_balance_formatted.clone(),
-        staking_balance_trth: staking_balance_formatted,
+        staking_balance_tlkd: staking_balance_formatted,
     }
 }
 
@@ -1297,28 +1288,25 @@ async fn balance_by_pubkey(
         .get(&account_id)
         .map(|acc| acc.balance)
         .unwrap_or(0);
-    let compute_escrow_trth = state
+    let compute_escrow_tlkd = state
         .accounts
         .get(&account_id)
-        .map(|acc| acc.compute_escrow_trth)
+        .map(|acc| acc.compute_escrow_tlkd)
         .unwrap_or(0);
 
     let staking_balance = state.staking_balance_of(&account_id).unwrap_or(0);
-    let balance_formatted = truthlinked_state::trth::format_amount(balance);
-    let compute_escrow_formatted = truthlinked_state::trth::format_amount(compute_escrow_trth);
+    let balance_formatted = truthlinked_state::token::format_amount(balance);
+    let compute_escrow_formatted = truthlinked_state::token::format_amount(compute_escrow_tlkd);
     let staking_balance_formatted =
-        truthlinked_state::trth::format_amount(staking_balance as u128);
+        truthlinked_state::token::format_amount(staking_balance as u128);
     Ok(Json(BalanceResponse {
         account_id: hex::encode(account_id),
         balance: balance.to_string(),
-        balance_tlkd: balance_formatted.clone(),
-        balance_trth: balance_formatted,
-        compute_escrow_trth: compute_escrow_trth.to_string(),
-        compute_escrow_tlkd_formatted: compute_escrow_formatted.clone(),
-        compute_escrow_trth_formatted: compute_escrow_formatted,
+        balance_tlkd: balance_formatted,
+        compute_escrow_tlkd: compute_escrow_tlkd.to_string(),
+        compute_escrow_tlkd_formatted: compute_escrow_formatted,
         staking_balance: staking_balance.to_string(),
-        staking_balance_tlkd: staking_balance_formatted.clone(),
-        staking_balance_trth: staking_balance_formatted,
+        staking_balance_tlkd: staking_balance_formatted,
     }))
 }
 
@@ -1416,10 +1404,10 @@ async fn account_info(
         .get(&account_id_arr)
         .map(|acc| acc.balance)
         .unwrap_or(0);
-    let compute_escrow_trth = state
+    let compute_escrow_tlkd = state
         .accounts
         .get(&account_id_arr)
-        .map(|acc| acc.compute_escrow_trth)
+        .map(|acc| acc.compute_escrow_tlkd)
         .unwrap_or(0);
     let nonce = state
         .accounts
@@ -1440,14 +1428,13 @@ async fn account_info(
         (None, None)
     };
 
-    let balance_formatted = truthlinked_state::trth::format_amount(balance);
+    let balance_formatted = truthlinked_state::token::format_amount(balance);
     Ok(Json(AccountInfoResponse {
         account_id: id,
         found,
         balance: balance.to_string(),
-        balance_tlkd: balance_formatted.clone(),
-        balance_trth: balance_formatted,
-        compute_escrow_trth: compute_escrow_trth.to_string(),
+        balance_tlkd: balance_formatted,
+        compute_escrow_tlkd: compute_escrow_tlkd.to_string(),
         nonce,
         replay_protection: "nonce+tx_hash".to_string(),
         code_hash,
@@ -2457,7 +2444,7 @@ struct TransactionResponse {
     gas_breakdown: Vec<(String, u64)>,
     gas_fee: Option<String>,
     cu_fee: Option<String>,
-    compute_fee_trth: Option<String>,
+    compute_fee_tlkd: Option<String>,
     fee_paid_tlkd: Option<String>,
 }
 
@@ -2568,14 +2555,14 @@ fn compute_gas_breakdown(intent: &serde_json::Value) -> (u64, Vec<(String, u64)>
                 ],
             )
         }
-        "WrapTRTH" => {
+        "WrapTLKD" => {
             let g = gp::get_u64(gp::PARAM_GAS_TRANSFER);
             (
                 g,
                 vec![("Balance debit", g / 2), ("wTLKD token mint", g - g / 2)],
             )
         }
-        "UnwrapTRTH" => {
+        "UnwrapTLKD" => {
             let g = gp::get_u64(gp::PARAM_GAS_TRANSFER);
             (
                 g,
@@ -2745,7 +2732,7 @@ async fn get_transaction_by_hash(
                     gas_breakdown,
                     gas_fee: tx_string_field(&tx_data, "gas_fee"),
                     cu_fee: tx_string_field(&tx_data, "cu_fee"),
-                    compute_fee_trth: tx_string_field(&tx_data, "compute_fee_trth"),
+                    compute_fee_tlkd: tx_string_field(&tx_data, "compute_fee_tlkd"),
                     fee_paid_tlkd: tx_string_field(&tx_data, "fee_paid_tlkd"),
                 }));
             }
@@ -2820,7 +2807,7 @@ async fn get_transaction_by_hash(
                     gas_breakdown,
                     gas_fee: tx_string_field(&tx_data, "gas_fee"),
                     cu_fee: tx_string_field(&tx_data, "cu_fee"),
-                    compute_fee_trth: tx_string_field(&tx_data, "compute_fee_trth"),
+                    compute_fee_tlkd: tx_string_field(&tx_data, "compute_fee_tlkd"),
                     fee_paid_tlkd: tx_string_field(&tx_data, "fee_paid_tlkd"),
                 }));
             }
@@ -2851,7 +2838,7 @@ fn transaction_lifecycle_response(
                 gas_breakdown: Vec::new(),
                 gas_fee: None,
                 cu_fee: None,
-                compute_fee_trth: None,
+                compute_fee_tlkd: None,
                 fee_paid_tlkd: None,
             }
         }
@@ -2869,7 +2856,7 @@ fn transaction_lifecycle_response(
                 gas_breakdown: Vec::new(),
                 gas_fee: None,
                 cu_fee: None,
-                compute_fee_trth: None,
+                compute_fee_tlkd: None,
                 fee_paid_tlkd: None,
             }
         }
@@ -2887,7 +2874,7 @@ fn transaction_lifecycle_response(
                 gas_breakdown: Vec::new(),
                 gas_fee: None,
                 cu_fee: None,
-                compute_fee_trth: None,
+                compute_fee_tlkd: None,
                 fee_paid_tlkd: None,
             }
         }

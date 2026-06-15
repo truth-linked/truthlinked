@@ -4,7 +4,7 @@ use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
-use truthlinked_core::constants::{ONE_TRTH, TX_SIGN_CONTEXT};
+use truthlinked_core::constants::{ONE_TLKD, TX_SIGN_CONTEXT};
 use truthlinked_core::pq_execution::{Transaction, TransactionIntent};
 use truthlinked_core::pq_identity::{account_id_from_pubkey, DualKeypair};
 use truthlinked_runtime::cells::{CellAccount, CellState, TokenConfig};
@@ -103,8 +103,8 @@ fn build_genesis(n: usize) -> (State, Vec<Actor>) {
             account_id,
             AccountRecord {
                 pubkey_bytes: pubkey_bytes.clone(),
-                balance: 1_000_000 * ONE_TRTH,
-                compute_escrow_trth: 0,
+                balance: 1_000_000 * ONE_TLKD,
+                compute_escrow_tlkd: 0,
                 nonce: 0,
                 nfts: vec![],
             },
@@ -174,7 +174,7 @@ fn fan_out_batch(actors: &[Actor], nonce_base: u64) -> Vec<Transaction> {
                 sender,
                 recipient.id,
                 &recipient.pubkey,
-                ONE_TRTH,
+                ONE_TLKD,
                 nonce_base + i as u64,
             )
         })
@@ -241,7 +241,7 @@ fn suite_commutative_ops() {
                 name: "BenchToken".into(),
                 symbol: "BTK".into(),
                 decimals: 9,
-                total_supply: 1_000_000_000 * ONE_TRTH,
+                total_supply: 1_000_000_000 * ONE_TLKD,
                 mint_authority: Some(issuer.id),
                 freeze_authority: None,
                 transfer_fee_bps: 0,
@@ -263,7 +263,7 @@ fn suite_commutative_ops() {
         state
             .cells
             .token_balances
-            .insert((token_id, actor.id), 1000 * ONE_TRTH);
+            .insert((token_id, actor.id), 1000 * ONE_TLKD);
     }
 
     // Build n TokenTransfer transactions — all to one recipient (commutative convergence test)
@@ -278,7 +278,7 @@ fn suite_commutative_ops() {
                 intent: TransactionIntent::TokenTransfer {
                     token_cell: token_id,
                     recipient,
-                    amount: ONE_TRTH,
+                    amount: ONE_TLKD,
                 },
                 signature: vec![],
                 timestamp: ts,
@@ -295,8 +295,8 @@ fn suite_commutative_ops() {
     let elapsed = t.elapsed();
 
     tps_line("token transfers (all-to-one)", result.applied, elapsed);
-    let expected_credits = n as u128 * ONE_TRTH;
-    // The recipient's token balance should have grown by n * ONE_TRTH
+    let expected_credits = n as u128 * ONE_TLKD;
+    // The recipient's token balance should have grown by n * ONE_TLKD
     // We check the token_balances in the output state
     let actual_credit = result
         .state
@@ -305,7 +305,7 @@ fn suite_commutative_ops() {
         .get(&(token_id, recipient))
         .copied()
         .unwrap_or(0);
-    let original = 1000 * ONE_TRTH; // pre-funded
+    let original = 1000 * ONE_TLKD; // pre-funded
     if actual_credit >= original + expected_credits {
         pass("commutative token credits converge to correct total");
     } else {
@@ -552,7 +552,7 @@ fn suite_replay_shield() {
     header("SUITE 6 — REPLAY SHIELD");
 
     let (state, actors) = build_genesis(2);
-    let tx = make_transfer(&actors[0], actors[1].id, &actors[1].pubkey, ONE_TRTH, 0);
+    let tx = make_transfer(&actors[0], actors[1].id, &actors[1].pubkey, ONE_TLKD, 0);
 
     // First execution must succeed
     let r1 = state.compute_transaction_diff_skip_sig(&tx);
@@ -578,7 +578,7 @@ fn suite_replay_shield() {
         &actors3[0],
         actors3[1].id,
         &actors3[1].pubkey,
-        ONE_TRTH,
+        ONE_TLKD,
         999,
     );
     let tx_b = tx_a.clone();
@@ -610,14 +610,14 @@ fn suite_partition_correctness() {
 
     // Two txs from the same sender — their native_debits both touch sender.balance
     // The partitioner must keep these in the SAME partition (serial execution)
-    let tx1 = make_transfer(sender, recipient1.id, &recipient1.pubkey, ONE_TRTH, 10);
-    let tx2 = make_transfer(sender, recipient2.id, &recipient2.pubkey, ONE_TRTH, 11);
+    let tx1 = make_transfer(sender, recipient1.id, &recipient1.pubkey, ONE_TLKD, 10);
+    let tx2 = make_transfer(sender, recipient2.id, &recipient2.pubkey, ONE_TLKD, 11);
 
     let batch = vec![tx1, tx2];
     let result = execute_batch_parallel(&state, &batch)
         .expect("partitioner should not abort on same-sender conflict");
 
-    // Both should apply without overflow — sender had 1M TRTH, sends 2x 1 TRTH
+    // Both should apply without overflow — sender had 1M TLKD, sends 2x 1 TLKD
     if result.applied == 2 && result.failed.is_empty() {
         // Verify sender's final balance is correct
         let final_balance = result
@@ -627,8 +627,8 @@ fn suite_partition_correctness() {
             .map(|a| a.balance)
             .unwrap_or(0);
         let gas_total = result.state.accumulated_gas_fees;
-        // sender started with 1M TRTH, sent 2 TRTH, paid gas fees
-        let expected_max = 1_000_000 * ONE_TRTH - 2 * ONE_TRTH;
+        // sender started with 1M TLKD, sent 2 TLKD, paid gas fees
+        let expected_max = 1_000_000 * ONE_TLKD - 2 * ONE_TLKD;
         if final_balance <= expected_max {
             pass("same-sender txs serialized correctly, balance consistent");
         } else {
@@ -974,7 +974,7 @@ fn suite_mixed_workload() {
                 name: "MixToken".into(),
                 symbol: "MIX".into(),
                 decimals: 9,
-                total_supply: 1_000_000 * ONE_TRTH,
+                total_supply: 1_000_000 * ONE_TLKD,
                 mint_authority: Some(actors[0].id),
                 freeze_authority: None,
                 transfer_fee_bps: 0,
@@ -994,7 +994,7 @@ fn suite_mixed_workload() {
         state
             .cells
             .token_balances
-            .insert((token_id, actors[i].id), 100 * ONE_TRTH);
+            .insert((token_id, actors[i].id), 100 * ONE_TLKD);
     }
 
     // Pre-mint NFTs in state directly
@@ -1028,7 +1028,7 @@ fn suite_mixed_workload() {
     for i in 0..n / 4 {
         let s = &actors[i + 1];
         let r = &actors[(i + n / 4 + 1) % (n * 2)];
-        batch.push(make_transfer(s, r.id, &r.pubkey, ONE_TRTH, nonce));
+        batch.push(make_transfer(s, r.id, &r.pubkey, ONE_TLKD, nonce));
         nonce += 1;
     }
 
@@ -1044,7 +1044,7 @@ fn suite_mixed_workload() {
             intent: TransactionIntent::TokenTransfer {
                 token_cell: token_id,
                 recipient: r.id,
-                amount: ONE_TRTH,
+                amount: ONE_TLKD,
             },
             signature: vec![],
             timestamp: ts,
@@ -1132,7 +1132,7 @@ fn suite_staking_pressure() {
         state.staking.validators.insert(
             actor.pubkey.clone(),
             truthlinked_staking::ValidatorStake {
-                active_stake: 100 * (ONE_TRTH as u64),
+                active_stake: 100 * (ONE_TLKD as u64),
                 unbonding: vec![],
                 jailed_until: None,
             },
@@ -1149,7 +1149,7 @@ fn suite_staking_pressure() {
             nonce: 0,
             sender: actor.id,
             intent: TransactionIntent::Stake {
-                amount: 10 * ONE_TRTH,
+                amount: 10 * ONE_TLKD,
             },
             signature: vec![],
             timestamp: nonce,
@@ -1167,7 +1167,7 @@ fn suite_staking_pressure() {
             nonce: 0,
             sender: actor.id,
             intent: TransactionIntent::Unstake {
-                amount: 10 * ONE_TRTH,
+                amount: 10 * ONE_TLKD,
             },
             signature: vec![],
             timestamp: nonce,

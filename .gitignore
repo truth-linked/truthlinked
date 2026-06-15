@@ -51,3 +51,11 @@ default.keys
 build/
 dist/
 *.swp
+foundation_keys.json
+deploy_wallet.json
+genesis_v2.json
+gen_systemd.sh
+start_chain.sh
+start_native_chain.sh
+airdrop.json
+agent_keys.json

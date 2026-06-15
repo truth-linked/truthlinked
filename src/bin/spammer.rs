@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use truthlinked_core::pq_execution::{BatchTransferEntry, Transaction, TransactionIntent};
 use truthlinked_core::pq_identity::{account_id_from_pubkey, DualKeypair};
-use truthlinked_core::ONE_TRTH;
+use truthlinked_core::ONE_TLKD;
 
 #[derive(Parser)]
 struct Args {
@@ -65,7 +65,7 @@ async fn main() -> anyhow::Result<()> {
             transfers.push(BatchTransferEntry {
                 recipient: account_id_from_pubkey(&recipient_pubkey),
                 recipient_pubkey: Some(recipient_pubkey),
-                amount: ONE_TRTH / 10,
+                amount: ONE_TLKD / 10,
             });
         }
     }
@@ -73,7 +73,7 @@ async fn main() -> anyhow::Result<()> {
         transfers.push(BatchTransferEntry {
             recipient: sender,
             recipient_pubkey: Some(pubkey.clone()),
-            amount: ONE_TRTH / 10,
+            amount: ONE_TLKD / 10,
         });
     }
 

@@ -298,7 +298,7 @@ fn make_event(tx: &TxRecord, my_id: &str) -> TxEvent {
     let is_in = tx.intent.recipient.as_deref() == Some(my_id)
         || itype.contains("airdrop")
         || itype.contains("mint");
-    let amt = amount.as_deref().unwrap_or("TRTH");
+    let amt = amount.as_deref().unwrap_or("TLKD");
 
     let (title, body) = match itype.as_str() {
         "transfer" => {
