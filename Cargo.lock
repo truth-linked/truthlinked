@@ -364,7 +364,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "axiom-cli"
-version = "0.1.4"
+version = "0.1.7"
 dependencies = [
  "bip39",
  "blake3",
@@ -383,8 +383,8 @@ dependencies = [
  "tempfile",
  "toml",
  "truthlinked-axiom-compiler 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-mcp 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-mcp",
  "truthlinked-state",
  "urlencoding",
 ]
@@ -987,24 +987,6 @@ dependencies = [
 [[package]]
 name = "donadb"
 version = "0.1.3"
-dependencies = [
- "arc-swap",
- "blake3",
- "bytes",
- "crc32fast",
- "crossbeam-channel",
- "crossbeam-skiplist",
- "dashmap 6.2.1",
- "libc",
- "lz4_flex",
- "memmap2",
- "tempfile",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "donadb"
-version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38da0327d74c4008caca1accd586a8482184734fe76486a84afffa74ee95873c"
 dependencies = [
@@ -1018,22 +1000,6 @@ dependencies = [
  "libc",
  "lz4_flex",
  "memmap2",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "donadb-rel"
-version = "0.1.2"
-dependencies = [
- "blake3",
- "bytes",
- "donadb 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "hex",
- "parking_lot",
- "rayon",
- "serde",
- "serde_json",
- "tempfile",
  "thiserror 1.0.69",
 ]
 
@@ -1137,27 +1103,6 @@ checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
 dependencies = [
  "event-listener 5.4.1",
  "pin-project-lite",
-]
-
-[[package]]
-name = "explorer-indexer"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "bytes",
- "clap",
- "donadb 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "donadb-rel",
- "hex",
- "reqwest 0.11.27",
- "serde",
- "serde_json",
- "sha2",
- "tokio",
- "tower-http",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -3832,21 +3777,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "trth-keygen"
-version = "0.1.0"
-dependencies = [
- "aes-gcm",
- "argon2",
- "bip39",
- "fips204",
- "hex",
- "rand 0.8.6",
- "rpassword",
- "serde_json",
- "truthlinked-core 0.1.3",
-]
-
-[[package]]
 name = "truthlinked"
 version = "0.1.0"
 dependencies = [
@@ -3868,6 +3798,7 @@ dependencies = [
  "crossbeam",
  "dashmap 5.5.3",
  "dirs",
+ "donadb",
  "fips203",
  "fips204",
  "futures",
@@ -3906,14 +3837,14 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "truthlinked-consensus 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-mcp 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-net 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-consensus",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-mcp",
+ "truthlinked-net",
+ "truthlinked-oracle",
+ "truthlinked-runtime",
+ "truthlinked-staking",
  "truthlinked-state",
  "uuid",
  "warp",
@@ -3937,7 +3868,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
- "truthlinked-axiom-sdk 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-sdk",
 ]
 
 [[package]]
@@ -3950,25 +3881,12 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
- "truthlinked-axiom-sdk 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-axiom-sdk",
 ]
 
 [[package]]
 name = "truthlinked-axiom-macro"
-version = "0.1.2"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "truthlinked-axiom-sdk"
-version = "0.1.3"
-dependencies = [
- "sha2",
- "truthlinked-axiom 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
-]
+version = "0.2.0"
 
 [[package]]
 name = "truthlinked-axiom-sdk"
@@ -3989,7 +3907,7 @@ dependencies = [
  "async-trait",
  "blake3",
  "chrono",
- "donadb 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "donadb",
  "fips204",
  "futures-util",
  "hex",
@@ -4004,80 +3922,19 @@ dependencies = [
  "tokio",
  "tokio-tungstenite 0.21.0",
  "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-mcp 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-net 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-state",
-]
-
-[[package]]
-name = "truthlinked-consensus"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cd868a37d805fbf95f92311f285038de0a90675c100f6b26bb5a694169e303d"
-dependencies = [
- "anyhow",
- "arc-swap",
- "async-trait",
- "blake3",
- "chrono",
- "donadb 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "fips204",
- "futures-util",
- "hex",
- "im",
- "postcard",
- "rand 0.8.6",
- "rayon",
- "serde",
- "serde_json",
- "sha2",
- "tokio",
- "tokio-tungstenite 0.21.0",
- "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-mcp 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-net 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-mcp",
+ "truthlinked-net",
+ "truthlinked-oracle",
+ "truthlinked-runtime",
+ "truthlinked-staking",
  "truthlinked-state",
 ]
 
 [[package]]
 name = "truthlinked-core"
 version = "0.1.3"
-dependencies = [
- "aes-gcm",
- "argon2",
- "bip39",
- "blake3",
- "fips203",
- "fips204",
- "hex",
- "hkdf",
- "hmac",
- "pbkdf2",
- "postcard",
- "rand 0.8.6",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
- "rpassword",
- "serde",
- "serde_json",
- "sha2",
-]
-
-[[package]]
-name = "truthlinked-core"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1196014437974c297e4230c57ff2891f74870a20b23e440538592eb86de22d7d"
 dependencies = [
  "aes-gcm",
  "argon2",
@@ -4107,20 +3964,7 @@ dependencies = [
  "lazy_static",
  "serde",
  "sha2",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "truthlinked-governance"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a87b14fa43863847f5bf8db2e091b4be810d5ae458e083d9876c83abd13cd743"
-dependencies = [
- "im",
- "lazy_static",
- "serde",
- "sha2",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
 ]
 
 [[package]]
@@ -4134,32 +3978,11 @@ dependencies = [
  "serde",
  "serde_json",
  "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "winterfell",
-]
-
-[[package]]
-name = "truthlinked-mcp"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75d6d6cf0728c88499b53bab1572d45de98551ccd0f895090067ab08aca43efc"
-dependencies = [
- "aes-gcm",
- "blake3",
- "hex",
- "im",
- "serde",
- "serde_json",
- "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-oracle",
+ "truthlinked-runtime",
+ "truthlinked-staking",
  "winterfell",
 ]
 
@@ -4185,37 +4008,8 @@ dependencies = [
  "tokio",
  "tokio-tungstenite 0.21.0",
  "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-state",
-]
-
-[[package]]
-name = "truthlinked-net"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d255efa0485dd482f97134e445e1b66ad5c73243f7652491c87ee7efe1c6f57"
-dependencies = [
- "aes-gcm",
- "anyhow",
- "async-trait",
- "fips203",
- "fips204",
- "futures-util",
- "hex",
- "hkdf",
- "libc",
- "postcard",
- "rand 0.8.6",
- "serde",
- "serde_json",
- "sha2",
- "socket2 0.5.10",
- "tokio",
- "tokio-tungstenite 0.21.0",
- "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
  "truthlinked-state",
 ]
 
@@ -4230,27 +4024,9 @@ dependencies = [
  "serde",
  "serde_json",
  "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "truthlinked-oracle"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aab74ddc088aef3e7a42644da1defc8085e8eb7dfd9d22151074f77da1018719"
-dependencies = [
- "blake3",
- "hex",
- "im",
- "reqwest 0.11.27",
- "serde",
- "serde_json",
- "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-staking",
 ]
 
 [[package]]
@@ -4261,26 +4037,18 @@ dependencies = [
  "im",
  "serde",
  "sha2",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-oracle",
+ "truthlinked-staking",
 ]
 
 [[package]]
-name = "truthlinked-runtime"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77cae95f79574bf6cee4a7877b867c299c60c248764178c8426f34b0e87835f6"
+name = "truthlinked-sdk"
+version = "0.1.3"
 dependencies = [
- "blake3",
- "im",
- "serde",
  "sha2",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-axiom 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -4293,31 +4061,13 @@ dependencies = [
  "serde",
  "sha2",
  "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "truthlinked-staking"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8448208988c59b4b4071d23388e06ad7c6995fb0bb46fdf690e284505c6c538a"
-dependencies = [
- "fips204",
- "hex",
- "rand 0.8.6",
- "serde",
- "sha2",
- "tracing",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
 ]
 
 [[package]]
 name = "truthlinked-state"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "810cc9432acb0a5a49c039a1d866afaac637dbab4671024267e61802379960e1"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -4349,12 +4099,12 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "truthlinked-axiom 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-governance 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-mcp 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-oracle 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-runtime 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "truthlinked-staking 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "truthlinked-core",
+ "truthlinked-governance",
+ "truthlinked-mcp",
+ "truthlinked-oracle",
+ "truthlinked-runtime",
+ "truthlinked-staking",
  "uuid",
 ]
 
