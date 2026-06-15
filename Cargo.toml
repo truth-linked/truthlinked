@@ -6,7 +6,21 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["crates/truthlinked-axiom", "crates/truthlinked-sdk", "crates/truthlinked-axiom-macro", "crates/truthlinked-axiom-compiler", "crates/axiom-cli", "crates/truthlinked-core", "crates/truthlinked-governance", "crates/truthlinked-staking", "crates/truthlinked-oracle", "crates/truthlinked-runtime", "crates/truthlinked-mcp", "crates/truthlinked-consensus", "crates/truthlinked-net", "trth-keygen", "donadb", "donadb-rel", "explorer-indexer"]
+members = [
+    "crates/truthlinked-axiom",
+    "crates/truthlinked-sdk",
+    "crates/truthlinked-axiom-macro",
+    "crates/truthlinked-axiom-compiler",
+    "crates/axiom-cli",
+    "crates/truthlinked-core",
+    "crates/truthlinked-governance",
+    "crates/truthlinked-staking",
+    "crates/truthlinked-oracle",
+    "crates/truthlinked-runtime",
+    "crates/truthlinked-mcp",
+    "crates/truthlinked-consensus",
+    "crates/truthlinked-net"
+]
 
 [profile.release]
 opt-level = 3
@@ -14,6 +28,7 @@ lto = "thin"
 codegen-units = 1
 
 [dependencies]
+donadb = "0.1.3"
 truthlinked-core = "0.1.3"
 truthlinked-governance = "0.1.2"
 truthlinked-staking = "0.1.2"
@@ -87,3 +102,30 @@ tokio-stream = { version = "0.1", features = ["sync"] }
 once_cell = "1.20"
 [dev-dependencies]
 tempfile = "3.8"
+
+[patch.crates-io]
+truthlinked-core = { path = "crates/truthlinked-core" }
+truthlinked-runtime = { path = "crates/truthlinked-runtime" }
+truthlinked-state = { path = "crates/truthlinked-state" }
+truthlinked-consensus = { path = "crates/truthlinked-consensus" }
+truthlinked-governance = { path = "crates/truthlinked-governance" }
+truthlinked-staking = { path = "crates/truthlinked-staking" }
+truthlinked-oracle = { path = "crates/truthlinked-oracle" }
+truthlinked-mcp = { path = "crates/truthlinked-mcp" }
+truthlinked-net = { path = "crates/truthlinked-net" }
+
+[[bin]]
+name = "bench_runtime"
+path = "src/bin/bench_runtime.rs"
+
+[[bin]]
+name = "bench_real"
+path = "src/bin/bench_real.rs"
+
+[[bin]]
+name = "bench_v3"
+path = "src/bin/bench_v3.rs"
+
+[[bin]]
+name = "bench_v4"
+path = "src/bin/bench_v4.rs"

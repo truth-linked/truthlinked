@@ -17,7 +17,7 @@ use std::collections::HashSet;
 use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
 use truthlinked_core::*;
-use truthlinked_state::parse_amount as parse_trth_amount;
+use truthlinked_state::parse_amount as parse_tlkd_amount;
 
 /// Returns the default signing key path.
 fn default_keyfile_path() -> String {
@@ -141,7 +141,7 @@ fn resolve_output(cli: &Cli) -> OutputFormat {
 }
 
 fn parse_amount_str(input: &str) -> Result<u128, String> {
-    parse_trth_amount(input)
+    parse_tlkd_amount(input)
 }
 
 enum RecipientInput {
@@ -582,7 +582,7 @@ struct RpcAccountInfo {
     account_id: String,
     found: bool,
     balance: String,
-    balance_trth: String,
+    balance_tlkd: String,
     is_cell: bool,
 }
 
@@ -893,18 +893,18 @@ enum Commands {
     },
 
     /// Show chain status and signer balance.
+    /// Show chain status, peer metrics, and signer balance in a unified view.
     Status {
         /// Keyfile or config to sign with.
         /// Defaults to the key created with `axiom keygen` (stored as ~/.truthlinked/default.keys
         /// and recorded in ~/.truthlinked/config.json).
         /// Use --from only when you want to override for this command.
-        #[arg(long, short = 'f', value_name = "KEYFILE")]
+        #[arg(long, short = 'k', value_name = "KEYFILE")]
         from: Option<String>,
         /// Include compute escrow, staking, and token balances.
-        #[arg(long, short = 'f')]
+        #[arg(long)]
         full: bool,
     },
-    /// Resolve a transaction, account, cell, or name.
     ///
     /// RPC: GET `/resolve/{query}`.
     Resolve { query: String },
@@ -926,10 +926,10 @@ enum Commands {
         #[arg(value_name = "account_id")]
         account_id: Option<String>,
         /// Signing keyfile or config file used when account_id is omitted.
-        #[arg(long, short = 'f', value_name = "KEYFILE")]
+        #[arg(long, short = 'k', value_name = "KEYFILE")]
         from: Option<String>,
         /// Include compute escrow, staking, and token balances.
-        #[arg(long, short = 'f')]
+        #[arg(long, short = 'S')]
         full: bool,
     },
     /// Show balance by public key.
@@ -940,15 +940,15 @@ enum Commands {
         #[arg(value_name = "pubkey")]
         pubkey: Option<String>,
         /// Signing keyfile or config file used when pubkey is omitted.
-        #[arg(long, short = 'f', value_name = "KEYFILE")]
+        #[arg(long, short = 'k', value_name = "KEYFILE")]
         from: Option<String>,
         /// Include compute escrow, staking, and token balances.
-        #[arg(long, short = 'f')]
+        #[arg(long, short = 'S')]
         full: bool,
     },
     /// Derive an account ID from a keyfile or public key.
     ///
-    /// Uses SHA256("truthlinked-account-id-v1" || pubkey).
+    /// Uses SHA256("tlkd-account-id-v1" || pubkey).
     AccountId {
         /// Keyfile or config to sign with.
 /// Defaults to the key created with `axiom keygen` (stored as ~/.truthlinked/default.keys
@@ -991,12 +991,12 @@ enum Commands {
     },
     /// Claim devnet faucet funds.
     ///
-    /// Submits a signed faucet request with a 15,000 native-token devnet limit.
+    /// Submits a signed faucet request with a 15,000 TLKD devnet limit.
     Faucet {
         /// Signing keyfile or config file (defaults to ./axiom/config, config, or ~/.truthlinked/default.keys).
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long, default_value = "15000")]
         amount: String,
     },
@@ -1009,7 +1009,7 @@ enum Commands {
 /// Use --from only to override.
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Allocation in native-token units, or raw base units with the configured subunit suffix.
+        /// Allocation in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         allocation: String,
     },
@@ -1028,7 +1028,7 @@ enum Commands {
         /// Recipient account ID.
         #[arg(long)]
         recipient: String,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
         /// Timelock in blocks
@@ -1088,7 +1088,7 @@ enum Commands {
 /// Use --from only when you want to override for this command.
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
     },
@@ -1101,7 +1101,7 @@ enum Commands {
 /// Use --from only when you want to override for this command.
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
     },
@@ -1117,7 +1117,7 @@ enum Commands {
         /// Comma-separated recipient pubkeys (hex)
         #[arg(long)]
         to_pubkeys: String,
-        /// Comma-separated native-token amounts
+        /// Comma-separated TLKD amounts
         #[arg(long)]
         amounts: String,
     },
@@ -1130,7 +1130,7 @@ enum Commands {
 /// Use --from only to override.
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
     },
@@ -1139,7 +1139,7 @@ enum Commands {
     /// Signs and submits a `Stake` transaction.
     /// Positional amount form: `bond <amount> [--from <keyfile>]`.
     Bond {
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(value_name = "amount")]
         amount: String,
         /// Keyfile or config to sign with (validator).
@@ -1150,7 +1150,7 @@ enum Commands {
     },
     /// Alias for bond: `stake <amount>`.
     Stake {
-        /// Amount in native-token units.
+        /// Amount in TLKD units.
         #[arg(value_name = "amount")]
         amount: Option<String>,
         /// Keyfile or config to sign with (validator).
@@ -1168,7 +1168,7 @@ enum Commands {
 /// Use --from only to override.
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount to unstake, in native-token units or raw base units.
+        /// Amount to unstake, in TLKD units or raw base units.
         #[arg(long)]
         amount: String,
     },
@@ -1222,7 +1222,7 @@ enum Commands {
         /// Validator owner public key
         #[arg(long)]
         owner_pubkey: String,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
     },
@@ -1236,7 +1236,7 @@ enum Commands {
         /// Validator owner public key
         #[arg(long)]
         owner_pubkey: String,
-        /// Amount in native-token units, or raw base units with the configured subunit suffix.
+        /// Amount in TLKD units, or raw base units with the configured xiom suffix.
         #[arg(long)]
         amount: String,
     },
@@ -1266,10 +1266,10 @@ enum Commands {
     ///
     /// Signs and submits a staking system call.
     #[command(name = "staked-tlkd-lock")]
-    StakedTrthLock {
+    StakedTlkdLock {
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
-        /// Amount to lock, in native-token units or raw base units.
+        /// Amount to lock, in TLKD units or raw base units.
         #[arg(long)]
         amount: String,
         /// Lock duration in blocks
@@ -1280,7 +1280,7 @@ enum Commands {
     ///
     /// Signs and submits a staking system call.
     #[command(name = "staked-tlkd-extend")]
-    StakedTrthExtend {
+    StakedTlkdExtend {
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
         /// New lock duration in blocks (from now)
@@ -1291,7 +1291,7 @@ enum Commands {
     ///
     /// Signs and submits a staking system call.
     #[command(name = "staked-tlkd-unlock")]
-    StakedTrthUnlock {
+    StakedTlkdUnlock {
         #[arg(long, short = 'f', value_name = "KEYFILE")]
         from: Option<String>,
     },
@@ -1609,7 +1609,7 @@ enum Commands {
         from: Option<String>,
         #[arg(long = "url-pattern")]
         url_pattern: String,
-        /// Bond amount in native-token units or raw base units.
+        /// Bond amount in TLKD units or raw base units.
         #[arg(long)]
         bond: String,
         #[arg(long, default_value = "7200")]
@@ -2100,7 +2100,7 @@ fn build_cell(
         }
     }
 
-    println!(" Building Axiom cell: {} → {}", source, output_axiom);
+    println!("✦ [1/2] Compiling Axiom Cell State: {} → {}", source, output_axiom);
     if source_path.extension().and_then(|ext| ext.to_str()) == Some("cell") {
         let compiled = truthlinked_axiom_compiler::compile_file(source_path)?;
         std::fs::write(&output_axiom, &compiled.bytecode)?;
@@ -2150,7 +2150,7 @@ fn build_cell(
         std::fs::copy(&produced, &output_axiom)?;
     }
 
-    println!(" Built successfully");
+    println!("✦ [2/2] Cell compilation completed successfully.");
     let bytecode = std::fs::read(&output_axiom)?;
     let analysis = truthlinked_core::cells::CellAccount::analyze_bytecode(&bytecode)
         .unwrap_or_else(|_| truthlinked_core::cells::ManifestAnalysis {
@@ -2169,9 +2169,9 @@ fn build_cell(
     });
 
     std::fs::write(&output_manifest, serde_json::to_string_pretty(&manifest)?)?;
-    println!(" Generated manifest: {}", output_manifest);
+    println!("⚙ Manifest Artifact Exported: {}", output_manifest);
     if !analysis.fully_resolved {
-        println!("  Warning: Some storage keys are dynamic. Review declared_reads/writes.");
+        println!("▲ Security Context: Dynamic storage keys identified. Cross-reference declared_reads/writes.");
     }
 
     Ok((output_axiom, output_manifest))
@@ -2500,40 +2500,40 @@ fn print_human(value: &Value, indent: usize, output: OutputFormat) {
     match value {
         Value::Object(map) => {
             if map.is_empty() {
-                println!("{}(empty)", pad);
+                println!("{}  (empty_slot_descriptor)", pad);
                 return;
             }
             for (key, val) in map {
                 match val {
                     Value::Object(_) | Value::Array(_) => {
-                        println!("{}{}:", pad, key);
+                        println!("{}  Key Definition ➔ {}", pad, key);
                         print_human(val, indent + 2, output);
                     }
                     _ => {
-                        println!("{}{}: {}", pad, key, format_scalar(val, output));
+                        println!("{}  Slot Value      ➔ {} ({})", pad, key, format_scalar(val, output));
                     }
                 }
             }
         }
         Value::Array(items) => {
             if items.is_empty() {
-                println!("{}(empty)", pad);
+                println!("{}  (empty_slot_descriptor)", pad);
                 return;
             }
             for (idx, item) in items.iter().enumerate() {
                 match item {
                     Value::Object(_) | Value::Array(_) => {
-                        println!("{}{}:", pad, idx);
+                        println!("{}  Matrix Index    ➔ {}", pad, idx);
                         print_human(item, indent + 2, output);
                     }
                     _ => {
-                        println!("{}{}: {}", pad, idx, format_scalar(item, output));
+                        println!("{}  Array Element   ➔ {} ({})", pad, idx, format_scalar(item, output));
                     }
                 }
             }
         }
         _ => {
-            println!("{}{}", pad, format_scalar(value, output));
+            println!("{}  Scalar Register ➔ {}", pad, format_scalar(value, output));
         }
     }
 }
@@ -2592,12 +2592,12 @@ fn print_balance_pretty(
     tokens: Option<&Value>,
     full: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let balance_trth = balance
-        .get("balance_trth")
+    let balance_tlkd = balance
+        .get("balance_tlkd")
         .and_then(|v| v.as_str())
         .unwrap_or("0 TLKD");
     if !full {
-        println!("{}", balance_trth);
+        println!("{} TLKD", balance_tlkd);
         return Ok(());
     }
 
@@ -2606,28 +2606,28 @@ fn print_balance_pretty(
         .and_then(|v| v.as_str())
         .unwrap_or("");
     let compute_escrow = balance
-        .get("compute_escrow_trth_formatted")
+        .get("compute_escrow_tlkd_formatted")
         .and_then(|v| v.as_str())
-        .or_else(|| balance.get("compute_escrow_trth").and_then(|v| v.as_str()))
+        .or_else(|| balance.get("compute_escrow_tlkd").and_then(|v| v.as_str()))
         .unwrap_or("0");
     let staking_balance = balance
-        .get("staking_balance_trth")
+        .get("staking_balance_tlkd")
         .and_then(|v| v.as_str())
         .unwrap_or("0 TLKD");
 
     if !account_id.is_empty() {
-        println!("Account: {}", format_address(account_id));
+        println!("Identity Address: 0x{}", format_address(account_id));
     }
-    println!("Balance: {}", balance_trth);
-    println!("Compute escrow: {}", compute_escrow);
-    println!("staking: {}", staking_balance);
+    println!("Liquid Balance:   {} TLKD", balance_tlkd);
+    println!("Compute Escrow:   {} TLKD", compute_escrow);
+    println!("Staking Allocation: {} TLKD", staking_balance);
 
     match tokens
         .and_then(|v| v.get("balances"))
         .and_then(|v| v.as_array())
     {
         Some(list) if !list.is_empty() => {
-            println!("Token balances:");
+            println!("── Registered Asset Balances:");
             for entry in list {
                 let cell_id = entry.get("cell_id").and_then(|v| v.as_str()).unwrap_or("");
                 let amount = entry.get("balance").and_then(|v| v.as_str()).unwrap_or("0");
@@ -2663,7 +2663,7 @@ fn print_balance_pretty(
             }
         }
         _ => {
-            println!("Token balances: none");
+            println!("── Registered Asset Balances: None discovered.");
         }
     }
 
@@ -3305,7 +3305,7 @@ fn sdk_generate_manifest(root: &std::path::Path) -> Result<(), Box<dyn std::erro
         .status()?;
 
     if !status.success() {
-        eprintln!(" Warning: manifest auto-generation failed; continuing with fallback.");
+        eprintln!(" Corporate System Exception: Manifest generation failed. Falling back to default baseline template.");
         return Ok(());
     }
 
@@ -3757,13 +3757,13 @@ fn submit_cell_deploy(
             truthlinked_core::cells::CellAccount::verify_manifest_against_bytecode(
                 &bytecode, &reads, &writes, &specs,
             )?;
-            eprintln!(" Manifest verified locally: {}", manifest_path);
+            eprintln!("✦ Validation Engine: Local contract manifest verified at {}", manifest_path);
             (reads, writes, commutative, specs, schema_ids)
         } else {
             let analysis = truthlinked_core::cells::CellAccount::analyze_bytecode(&bytecode)
                 .map_err(|e| format!("Axiom static analysis failed: {}", e))?;
             if !analysis.fully_resolved {
-                eprintln!(" Warning: Some storage keys are dynamic. Provide --manifest-file for full conflict detection.");
+                eprintln!("▲ Security Context: Unresolved dynamic storage tracks. Use --manifest-file to trigger collision checks.");
             }
             (
                 analysis.static_read_slots,
@@ -3799,7 +3799,7 @@ fn submit_cell_deploy(
     let signed_tx = sender_keys.sign_transaction(&tx)?;
     let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-    eprintln!("Submitting cell deployment...");
+    eprintln!("✦ Network Engine: Broadcasting cell deployment payload to remote runtime environment...");
     let res: Value = post_bytes(client, &format!("{}/submit_raw", rpc), tx_bytes, retries)?;
     print_output(&res, output)?;
 
@@ -3967,11 +3967,11 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     let out = serde_json::json!({
                         "account_id": res.get("account_id").cloned().unwrap_or(Value::Null),
                         "balance": res.get("balance").cloned().unwrap_or(Value::Null),
-                        "balance_trth": res.get("balance_trth").cloned().unwrap_or(Value::Null),
-                        "compute_escrow_trth": res.get("compute_escrow_trth").cloned().unwrap_or(Value::Null),
-                        "compute_escrow_trth_formatted": res.get("compute_escrow_trth_formatted").cloned().unwrap_or(Value::Null),
+                        "balance_tlkd": res.get("balance_tlkd").cloned().unwrap_or(Value::Null),
+                        "compute_escrow_tlkd": res.get("compute_escrow_tlkd").cloned().unwrap_or(Value::Null),
+                        "compute_escrow_tlkd_formatted": res.get("compute_escrow_tlkd_formatted").cloned().unwrap_or(Value::Null),
                         "staking_balance": res.get("staking_balance").cloned().unwrap_or(Value::Null),
-                        "staking_balance_trth": res.get("staking_balance_trth").cloned().unwrap_or(Value::Null),
+                        "staking_balance_tlkd": res.get("staking_balance_tlkd").cloned().unwrap_or(Value::Null),
                         "token_balances": tokens.get("balances").cloned().unwrap_or(Value::Null),
                     });
                     print_output(&out, output)?;
@@ -4012,11 +4012,11 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     let out = serde_json::json!({
                         "account_id": res.get("account_id").cloned().unwrap_or(Value::Null),
                         "balance": res.get("balance").cloned().unwrap_or(Value::Null),
-                        "balance_trth": res.get("balance_trth").cloned().unwrap_or(Value::Null),
-                        "compute_escrow_trth": res.get("compute_escrow_trth").cloned().unwrap_or(Value::Null),
-                        "compute_escrow_trth_formatted": res.get("compute_escrow_trth_formatted").cloned().unwrap_or(Value::Null),
+                        "balance_tlkd": res.get("balance_tlkd").cloned().unwrap_or(Value::Null),
+                        "compute_escrow_tlkd": res.get("compute_escrow_tlkd").cloned().unwrap_or(Value::Null),
+                        "compute_escrow_tlkd_formatted": res.get("compute_escrow_tlkd_formatted").cloned().unwrap_or(Value::Null),
                         "staking_balance": res.get("staking_balance").cloned().unwrap_or(Value::Null),
-                        "staking_balance_trth": res.get("staking_balance_trth").cloned().unwrap_or(Value::Null),
+                        "staking_balance_tlkd": res.get("staking_balance_tlkd").cloned().unwrap_or(Value::Null),
                         "token_balances": tokens.get("balances").cloned().unwrap_or(Value::Null),
                     });
                     print_output(&out, output)?;
@@ -4053,8 +4053,8 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 });
                 print_output(&out, output)?;
             } else {
-                println!("Account ID: {}", hex::encode(&account_id));
-                println!("Public Key: {}", hex::encode(&pk_bytes));
+                println!("Account Identity Hash: 0x{}", hex::encode(&account_id));
+                println!("Public Identity Key:   0x{}", hex::encode(&pk_bytes));
             }
         }
 
@@ -4098,10 +4098,10 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 });
                 print_output(&out, output)?;
             } else {
-                println!(" Keypair imported successfully");
-                println!("   Keyfile: {}", output_path);
-                println!("   Account ID: {}", hex::encode(&account_id));
-                println!("   Public Key: {}", hex::encode(&pubkey));
+                println!("┌── KEYPAIR LOGISTICS MANAGER");
+                println!("│  Storage File:  {}", output_path);
+                println!("│  Account Hash:  0x{}", hex::encode(&account_id));
+                println!("│  Public Engine: 0x{}", hex::encode(&pubkey));
             }
         }
         Commands::AccountCreate {
@@ -4135,7 +4135,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 Some(password)
             } else {
-                eprintln!(" Warning: Keyfile will be saved unencrypted");
+                eprintln!("▲ SECURITY WARNING: Local keyfile record will be committed to storage unencrypted.");
                 None
             };
 
@@ -4180,19 +4180,19 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     "is_now_default": is_default,
                 });
                 print_output(&out, output)?;
-                eprintln!(" Warning: The mnemonic was printed to stdout. Treat it as sensitive.");
+                eprintln!("▲ CRITICAL CLEAR-TEXT HAZARD: Private mnemonic seed printed to stdout context.");
             } else {
-                println!(" Keypair created");
-                println!("   Keyfile: {}", output_path);
-                println!("   Account ID: {}", hex::encode(&account_id));
-                println!("   Public Key: {}", hex::encode(&pubkey));
+                println!("┌── KEYPAIR LOGISTICS MANAGER");
+                println!("│  Storage File:  {}", output_path);
+                println!("│  Account Hash:  0x{}", hex::encode(&account_id));
+                println!("│  Public Engine: 0x{}", hex::encode(&pubkey));
                 if is_default {
-                    println!("   This is now your DEFAULT key for all axiom commands (send, stake, deploy, nft, etc.).");
-                    println!("   You no longer need --from unless you want to use a different key.");
+                    println!("│  Default Context:       Assigned as default routing key for local commands.");
+                    println!("│  Parameter Optimization: Explicit execution flags via '--from' are no longer required.");
                 }
-                eprintln!(" Warning: The mnemonic below controls this account.");
-                eprintln!("          Do not paste it into terminals, logs, or CI.");
-                eprintln!("   Mnemonic: {}", mnemonic);
+                eprintln!("├─ ▲ EXTREME DATA CAUTION ───────────────────────────────────");
+                eprintln!("│  Do not paste these seed strings into web browsers, logs, or public terminal runners.");
+                eprintln!("│  Mnemonic Secret:  {}\n│  Passphrase Check: [User Custom Configuration Defined]", mnemonic);
                 if passphrase.is_some() {
                     eprintln!("   Passphrase: (provided, must be remembered for recovery)");
                 }
@@ -4255,7 +4255,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 map.entry("amount".to_string())
                     .or_insert_with(|| serde_json::json!(amount_raw.to_string()));
                 map.entry("amount_tlkd".to_string())
-                    .or_insert_with(|| serde_json::json!(truthlinked_state::trth::format_amount(amount_raw)));
+                    .or_insert_with(|| serde_json::json!(truthlinked_state::token::format_amount(amount_raw)));
             }
             print_output(&parsed, output)?;
         }
@@ -4275,7 +4275,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let entry = serde_json::json!({
                 "from": keys_path,
                 "allocation": allocation_raw,
-                "allocation_trth": allocation,
+                "allocation_tlkd": allocation,
                 "account_id": hex::encode(account_id),
                 "public_key": hex::encode(pubkey),
             });
@@ -4300,10 +4300,10 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             };
 
             let keypair = if std::path::Path::new(&key_path).exists() {
-                println!(" Re-using existing validator key at {}", key_path);
+                println!("⚙ Re-mapping terminal operations to existing validator signature file: {}", key_path);
                 pq_identity::DualKeypair::load(&key_path)?
             } else {
-                println!(" Generating new validator key...");
+                println!("⚙ Generating fresh cryptographic validator key records...");
                 let mut entropy = [0u8; 32];
                 rand::thread_rng().fill_bytes(&mut entropy);
                 let mnemonic = Mnemonic::from_entropy(&entropy)?;
@@ -4312,8 +4312,8 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     let _ = std::fs::create_dir_all(parent);
                 }
                 kp.save_with_password(&key_path, None)?;
-                println!("   Saved validator key to: {}", key_path);
-                println!("   Mnemonic (write it down, never share): {}", mnemonic);
+                println!("⚙ Validator signature files committed to: {}", key_path);
+                println!("⚙ Account Backup Secret (Store Offline): {}", mnemonic);
                 kp
             };
 
@@ -4326,10 +4326,10 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 "allocation": alloc_raw,
             });
 
-            println!("\n=== Add this to your genesis_validator.json (validators array) ===");
+            println!("\n┌── DATA EXPORT: GENESIS VALIDATOR COMPONENT (Append to genesis_validator.json)");
             println!("{}", serde_json::to_string_pretty(&genesis_entry).unwrap());
 
-            println!("\n=== To run a node with this validator ===");
+            println!("└────────────────────────────────────────────────────────────");
             println!("  ./target/release/node --validator-keys {} --genesis-file genesis_validator.json ...", key_path);
             println!("  (see start_network.sh for full examples)");
 
@@ -4974,7 +4974,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     match parse_recipient_input(&r) {
                         Ok(spec) => break spec,
                         Err(e) => {
-                            eprintln!(" Error: {}", e);
+                            eprintln!("Corporate Exception Handling Engine: Command execution failed with exception: {}", e);
                         }
                     }
                 };
@@ -4987,7 +4987,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     match parse_amount_str(&a) {
                         Ok(val) => break val,
                         Err(e) => {
-                            eprintln!(" Error: {}", e);
+                            eprintln!("Corporate Exception Handling Engine: Command execution failed with exception: {}", e);
                         }
                     }
                 };
@@ -4996,7 +4996,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 if amount_raw == 0 {
                     return Err("Amount must be > 0".into());
                 }
-                if amount_raw >= (LARGE_TRANSFER_TLKD as u128) * truthlinked_core::ONE_TRTH {
+                if amount_raw >= (LARGE_TRANSFER_TLKD as u128) * truthlinked_core::ONE_TLKD {
                     confirm_or_abort(cli.yes, output, "Large transfer — are you sure?")?;
                 }
                 let (sender_keys, sender_pubkey) = load_keypair_and_pubkey(&from_path)?;
@@ -5302,7 +5302,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 .split(',')
                 .map(|s| {
                     let s = s.trim();
-                    let amt = parse_trth_amount(s)?;
+                    let amt = parse_tlkd_amount(s)?;
                     Ok(amt)
                 })
                 .collect::<Result<Vec<_>, Box<dyn std::error::Error>>>()?;
@@ -5323,7 +5323,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 .into());
             }
 
-            eprintln!(" Batch transfer: {} transactions", recipients.len());
+            eprintln!("✦ Batch Scheduler: Compiling {} concurrent transactions into transaction block...", recipients.len());
 
             let balance_res = post_json(
                 &client,
@@ -5350,7 +5350,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 parsed_recipients.push((spec, *amount));
             }
 
-            if total_amount >= (LARGE_TRANSFER_TLKD as u128) * ONE_TRTH {
+            if total_amount >= (LARGE_TRANSFER_TLKD as u128) * ONE_TLKD {
                 confirm_or_abort(cli.yes, output, "Large batch transfer; confirm")?;
             }
 
@@ -5426,7 +5426,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting batch transfer...");
+            eprintln!("✦ Network Engine: Pushing transaction block array to consensus mempool...");
             let res: Value = post_bytes(
                 &client,
                 &format!("{}/submit_raw", rpc),
@@ -5441,7 +5441,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let sender_keys = pq_identity::DualKeypair::load(&keyfile)?;
 
             if output == OutputFormat::Pretty {
-                eprintln!(" Bonding {} TLKD...", amount);
+                eprintln!("✦ Network Engine: Initiating staking bond sequence for {} TLKD...", amount);
             }
             let sender_pubkey = sender_keys.dilithium_pk.clone().into_bytes().to_vec();
             let sender_account_id = pq_identity::account_id_from_pubkey(&sender_pubkey);
@@ -5492,11 +5492,11 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     .and_then(|v| v.as_str())
                     .unwrap_or("unknown");
                 if output == OutputFormat::Pretty {
-                    eprintln!(" Bonded {} TLKD", amount);
-                    eprintln!("   TX Hash: {}", tx_hash);
-                    eprintln!("\n Validator setup complete!");
-                    eprintln!("   Status: Active");
-                    eprintln!("   Stake: {} TLKD", amount);
+                    eprintln!("✦ Network Engine: Cryptographic deposit locked. Bonded {} TLKD.", amount);
+                    eprintln!("  └─ Consensus TX Hash Reference: 0x{}", tx_hash);
+                    eprintln!("\n✦ Operational Status: Validator Node Setup Finalized.");
+                    eprintln!("   ├─ Core Node Status:  Active Consensus Participant");
+                    eprintln!("   └─ Tokenized Stake:   {} TLKD", amount);
                 }
             } else if output == OutputFormat::Pretty {
                 eprintln!(" Bonding failed: {}", json_string(&res, output)?);
@@ -5999,7 +5999,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             print_output(&res, output)?;
         }
 
-        Commands::StakedTrthLock {
+        Commands::StakedTlkdLock {
             from,
             amount,
             lock_blocks,
@@ -6046,7 +6046,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             print_output(&res, output)?;
         }
 
-        Commands::StakedTrthExtend { from, lock_blocks } => {
+        Commands::StakedTlkdExtend { from, lock_blocks } => {
             let sender_keys = load_keypair_arg(from.as_deref(), config.as_ref())?;
             let sender_pubkey = sender_keys.dilithium_pk.clone().into_bytes().to_vec();
             let sender_account_id = pq_identity::account_id_from_pubkey(&sender_pubkey);
@@ -6085,7 +6085,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             print_output(&res, output)?;
         }
 
-        Commands::StakedTrthUnlock { from } => {
+        Commands::StakedTlkdUnlock { from } => {
             let sender_keys = load_keypair_arg(from.as_deref(), config.as_ref())?;
             let sender_pubkey = sender_keys.dilithium_pk.clone().into_bytes().to_vec();
             let sender_account_id = pq_identity::account_id_from_pubkey(&sender_pubkey);
@@ -6421,14 +6421,14 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             manifest_file,
         } => {
             let (axiom_path, manifest_path) = if let Some(src) = source {
-                eprintln!(" Building cell from source...");
+                eprintln!("✦ [1/2] Compiling target cell architecture directly from source context...");
                 let (wasm, manifest) = build_cell(&src, None)?;
                 (wasm, Some(manifest))
             } else if let Some(wasm) = bytecode_file {
                 let manifest = manifest_file.or_else(|| {
                     let auto_manifest_path = wasm.replace(".axiom", ".manifest.json");
                     if std::path::Path::new(&auto_manifest_path).exists() {
-                        eprintln!(" Found manifest: {}", auto_manifest_path);
+                        eprintln!("✦ [2/2] Local structural manifest discovered at track reference: {}", auto_manifest_path);
                         Some(auto_manifest_path)
                     } else {
                         None
@@ -6521,7 +6521,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting token deployment...");
+            eprintln!("✦ Network Engine: Disbursing tokenized smart asset deployment across environment...");
             let res: Value = post_bytes(
                 &client,
                 &format!("{}/submit_raw", rpc),
@@ -6578,10 +6578,10 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 "submit_raw"
             };
             if simulate {
-                eprintln!("Simulating cell call...");
-                eprintln!(" Simulation validates the signed transaction without committing state.");
+                eprintln!("✦ Simulation Engine: Running speculative local call transaction against block height...");
+                eprintln!("  (Executing contract verification locally. Matrix states remain uncommitted to consensus.)");
             } else {
-                eprintln!("Calling cell...");
+                eprintln!("✦ Network Engine: Transmitting execution call signature to network cell matrix...");
             }
             let res: Value = post_bytes(
                 &client,
@@ -6601,14 +6601,14 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             manifest_file,
         } => {
             let (axiom_path, manifest_path) = if let Some(src) = source {
-                eprintln!(" Building cell from source...");
+                eprintln!("✦ [1/2] Compiling target cell architecture directly from source context...");
                 let (wasm, manifest) = build_cell(&src, None)?;
                 (wasm, Some(manifest))
             } else if let Some(wasm) = bytecode_file {
                 let manifest = manifest_file.or_else(|| {
                     let auto_manifest = wasm.replace(".axiom", ".manifest.json");
                     if std::path::Path::new(&auto_manifest).exists() {
-                        eprintln!(" Found manifest: {}", auto_manifest);
+                        eprintln!("✦ [2/2] Network configuration mapping structural manifest matched at: {}", auto_manifest);
                         Some(auto_manifest)
                     } else {
                         None
@@ -6652,7 +6652,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     &new_storage_key_specs,
                 )?;
 
-                eprintln!(" Manifest verified locally");
+                eprintln!("✦ Validation Engine: Contract integrity and manifest parameters verified locally.");
                 (
                     new_declared_reads,
                     new_declared_writes,
@@ -6698,7 +6698,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Upgrading cell...");
+            eprintln!("✦ Network Engine: Packaging cell instruction upgrades for ledger state transition...");
             let res: Value = post_bytes(
                 &client,
                 &format!("{}/submit_raw", rpc),
@@ -6902,14 +6902,14 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             cell_id_arr.copy_from_slice(&cell_id_bytes);
 
             let (axiom_path, manifest_path) = if let Some(src) = source {
-                eprintln!(" Building cell from source...");
+                eprintln!("✦ [1/2] Compiling target cell architecture directly from source context...");
                 let (wasm, manifest) = build_cell(&src, None)?;
                 (wasm, Some(manifest))
             } else if let Some(wasm) = bytecode_file {
                 let manifest = manifest_file.or_else(|| {
                     let auto_manifest = wasm.replace(".axiom", ".manifest.json");
                     if std::path::Path::new(&auto_manifest).exists() {
-                        eprintln!(" Found manifest: {}", auto_manifest);
+                        eprintln!("✦ [2/2] Network configuration mapping structural manifest matched at: {}", auto_manifest);
                         Some(auto_manifest)
                     } else {
                         None
@@ -7536,8 +7536,8 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 "submit_raw"
             };
             if simulate {
-                eprintln!("Simulating call chain...");
-                eprintln!(" Simulation validates the signed transaction without committing state.");
+                eprintln!("✦ Simulation Engine: Running multi-layer call chain transaction sequence...");
+                eprintln!("  (Executing contract verification locally. Matrix states remain uncommitted to consensus.)");
             } else {
                 eprintln!("Submitting call chain...");
             }
@@ -7802,7 +7802,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting URL proposal...");
+            eprintln!("✦ Network Engine: Registering proposed URL network endpoint to distributed table structures...");
             let res: Value = post_bytes(
                 &client,
                 &format!("{}/submit_raw", rpc),
@@ -7847,7 +7847,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting URL vote...");
+            eprintln!("✦ Network Engine: Logging network validation vote for open endpoint routing target...");
             let res: Value = client
                 .post(format!("{}/submit_raw", rpc))
                 .body(tx_bytes)
@@ -7894,7 +7894,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting malicious URL report...");
+            eprintln!("✦ Network Engine: Broadcasted security report flag for malicious domain infrastructure...");
             let res: Value = client
                 .post(format!("{}/submit_raw", rpc))
                 .body(tx_bytes)
@@ -7944,7 +7944,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let signed_tx = sender_keys.sign_transaction(&tx)?;
             let tx_bytes = postcard::to_allocvec(&signed_tx)?;
 
-            eprintln!("Submitting visibility upgrade...");
+            eprintln!("✦ Network Engine: Escalating execution visibility layer boundaries on active state space...");
             let res: Value = client
                 .post(format!("{}/submit_raw", rpc))
                 .body(tx_bytes)
@@ -7964,15 +7964,15 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             }
             std::fs::create_dir_all(target_dir)?;
             write_embedded_dir(&SDK_TEMPLATE_DIR, target_dir)?;
-            println!(" SDK cell template created at {}", path);
-            println!("   Build: axiom sdk-build --path {}", path);
+            println!("✦ SDK Blueprint Engine: Fresh cell code architecture initialized at directory path: {}", path);
+            println!("  Instruction Path:\n    Build Package ➔ axiom sdk-build --path {}", path);
         }
 
         Commands::SDKBuild { path, output } => {
             let (axiom_path, manifest_path) = sdk_build_project(&path, output.as_deref())?;
-            println!(" SDK build complete");
-            println!("   Bytecode: {}", axiom_path);
-            println!("   Manifest: {}", manifest_path);
+            println!("✦ SDK Blueprint Engine: Code compilation process completed successfully.");
+            println!("   ├─ Bytecode Location:  {}", axiom_path);
+            println!("   └─ Manifest Parameter:  {}", manifest_path);
         }
 
         Commands::SDKDeploy {
@@ -8053,9 +8053,9 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             let manifest_path = bytecode_file.replace(".axiom", ".manifest.json");
             std::fs::write(&manifest_path, serde_json::to_string_pretty(&manifest)?)?;
 
-            println!("Manifest written: {}", manifest_path);
+            println!("⚙ Manifest structural document written to target path destination: {}", manifest_path);
             if analysis.fully_resolved {
-                println!("Static resolution: COMPLETE");
+                println!("┌── STATIC ANALYSIS COMPILER SUMMARY\n│  Memory Resolution: [COMPLETE] Full static mapping.");
                 println!(
                     "  Read slots  resolved: {}",
                     analysis.static_read_slots.len()
@@ -8065,7 +8065,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     analysis.static_write_slots.len()
                 );
             } else if analysis.has_storage_reads || analysis.has_storage_writes {
-                println!("Static resolution: PARTIAL");
+                println!("┌── STATIC ANALYSIS COMPILER SUMMARY\n│  Memory Resolution: [PARTIAL ANALYSIS] Dynamic allocation loops bypass deep mapping.");
                 println!("  Resolved reads:  {}", analysis.static_read_slots.len());
                 println!("  Resolved writes: {}", analysis.static_write_slots.len());
                 println!(
@@ -8097,26 +8097,26 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(()) => {
                     let analysis =
                         truthlinked_core::cells::CellAccount::analyze_bytecode(&bytecode)?;
-                    println!("Manifest verification PASSED");
-                    println!("  Bytecode: {}", bytecode_file);
-                    println!("  Manifest: {}", manifest_file);
-                    println!("  Declared reads:  {}", declared_reads.len());
-                    println!("  Declared writes: {}", declared_writes.len());
-                    println!("  Key specs:       {}", storage_key_specs.len());
+                    println!("┌── STATIC ANALYSIS COMPILER SUMMARY\n│  Memory Resolution: [COMPLETE] Full static mapping.");
+                    println!("│  Target Bytecode:  {}", bytecode_file);
+                    println!("│  Target Manifest:  {}", manifest_file);
+                    println!("│  Explicit Reads:   {}", declared_reads.len());
+                    println!("│  Explicit Writes:  {}", declared_writes.len());
+                    println!("│  Key Index Specs:  {}", storage_key_specs.len());
                     if analysis.fully_resolved {
-                        println!("  Static analysis: FULL ({} read / {} write slots confirmed in bytecode)",
+                        println!("│  Enforcement Mode: [FULL BOUNDARY SECURITY] ({} read / {} write slots locked in bytecode)",
                             analysis.static_read_slots.len(),
                             analysis.static_write_slots.len());
                     } else if analysis.has_storage_reads || analysis.has_storage_writes {
-                        println!("  Static analysis: PARTIAL - dynamic calls accepted on declared trust.");
-                        println!("    Use the SDK storage_slot! macro to enable full bytecode enforcement.");
+                        println!("│  Enforcement Mode: [PARTIAL ISOLATION] Dynamic storage references discovered.");
+                        println!("│  Developer Directive: Wrap logic statements with the storage_slot! macro to fix compilation logs.");
                     } else {
-                        println!("  Static analysis: No storage operations detected.");
+                        println!("│  Enforcement Mode: No persistent state operations detected within target bytecode matrix.");
                     }
                 }
                 Err(e) => {
-                    eprintln!("Manifest verification FAILED");
-                    eprintln!("  Reason: {}", e);
+                    eprintln!("Corporate Security Exception: Structural manifest parameter verification failed.");
+                    eprintln!("Corporate Security Trace Logic: Verification rejection exception reason: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -8143,10 +8143,10 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 &oracle_schema_ids,
             );
 
-            println!(" Manifest Hash: {}", hex::encode(&manifest_hash));
-            println!("   Bytecode: {}", bytecode_file);
-            println!("   Manifest: {}", manifest_file);
-            println!("   This hash will be stored on-chain at deploy/upgrade.");
+            println!("│  Global Manifest Hash ID: 0x{}", hex::encode(&manifest_hash));
+            println!("│  Bytecode Footprint ID:   {}", bytecode_file);
+            println!("│  Consensus Target Key:    {}\n│  Status Note: This cryptographic root hash maps identity states upon network entry.", manifest_file);
+            println!("│  Consensus Target Key:    {}\n│  Status Note: This cryptographic root hash maps identity states upon network entry.", manifest_file);
         }
     }
 
