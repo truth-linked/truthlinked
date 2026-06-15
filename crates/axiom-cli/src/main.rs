@@ -1000,9 +1000,8 @@ enum Commands {
         #[arg(long, default_value = "15000")]
         amount: String,
     },
-    /// Generate a genesis validator entry.
-    ///
-    /// Prints the validator account, public key, and allocation.
+    /// Generate a genesis validator entry (internal use).
+    #[command(hide = true)]
     GenesisValidator {
         /// Keyfile or config to sign with (validator).
 /// Defaults to the key created with `axiom keygen` (see `axiom keygen --help`).
@@ -5507,6 +5506,21 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                     eprintln!("\n✦ Operational Status: Validator Node Setup Finalized.");
                     eprintln!("   ├─ Core Node Status:  Active Consensus Participant");
                     eprintln!("   └─ Tokenized Stake:   {} TLKD", amount);
+                    let script_path = "start_validator.sh";
+                    if !std::path::Path::new(script_path).exists() {
+                        let mut s = String::new();
+                        s.push_str("#!/bin/bash\n# TruthLinked Validator Start Script\n# Run: bash start_validator.sh /path/to/node\nset -e\n");
+                        s.push_str(&format!("KEYS=\"{}\"\n", keyfile));
+                        s.push_str("DATA_DIR=\"${HOME}/.truthlinked/data\"\n");
+                        s.push_str("NODE_BIN=\"${1:-./node}\"\n");
+                        s.push_str("GENESIS_URL=\"https://raw.githubusercontent.com/truth-linked/truthlinked/main/genesis_bootnodes_public.json\"\n");
+                        s.push_str("BOOTNODES=$(curl -sf \"$GENESIS_URL\" | python3 -c \"import sys,json\nd=json.load(sys.stdin)\nprint(chr(10).join('--bootnodes '+b['address']+':'+b['pubkey'] for b in d['bootnodes']))\" 2>/dev/null)\n");
+                        s.push_str("mkdir -p \"$DATA_DIR\"\n");
+                        s.push_str("exec \"$NODE_BIN\" \\\n  --validator-keys \"$KEYS\" \\\n  --data-dir \"$DATA_DIR\" \\\n  --rpc-port 19944 \\\n  --p2p-port 19080 \\\n  --ingress-port 18080 \\\n  $BOOTNODES\n");
+                        let _ = std::fs::write(script_path, &s);
+                        let _ = std::process::Command::new("chmod").args(["+x", script_path]).status();
+                        eprintln!("\n✔ Start script written: {}  (run: bash start_validator.sh /path/to/node)", script_path);
+                    } else { eprintln!("  (start_validator.sh already exists — not overwritten)"); }
                 }
             } else if output == OutputFormat::Pretty {
                 eprintln!(" Bonding failed: {}", json_string(&res, output)?);
