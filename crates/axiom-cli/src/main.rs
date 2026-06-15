@@ -1736,6 +1736,24 @@ enum Commands {
         #[arg(long, default_value = "1000000")]
         allocation: String,
     },
+    /// Show or update CLI configuration (~/.truthlinked/config.json).
+    ///
+    /// With no arguments, prints current config.
+    /// Use --set-rpc, --set-keyfile, --set-network to update values.
+    Config {
+        /// Set the default RPC URL.
+        #[arg(long)]
+        set_rpc: Option<String>,
+        /// Set the default keyfile path.
+        #[arg(long)]
+        set_keyfile: Option<String>,
+        /// Set the default network (local, testnet, mainnet).
+        #[arg(long)]
+        set_network: Option<String>,
+        /// Reset config to defaults.
+        #[arg(long)]
+        reset: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -4289,6 +4307,48 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 "public_key": hex::encode(pubkey),
             });
             print_output(&entry, output)?;
+        }
+
+        Commands::Config { set_rpc, set_keyfile, set_network, reset } => {
+            let config_path = dirs::home_dir()
+                .map(|p| p.join(".truthlinked").join("config.json"))
+                .ok_or("Cannot determine home directory")?;
+            let _ = std::fs::create_dir_all(config_path.parent().unwrap());
+
+            let mut cfg: serde_json::Value = if config_path.exists() && !reset {
+                let raw = std::fs::read_to_string(&config_path).unwrap_or_default();
+                serde_json::from_str(&raw).unwrap_or(serde_json::json!({}))
+            } else {
+                serde_json::json!({})
+            };
+
+            let any_change = set_rpc.is_some() || set_keyfile.is_some() || set_network.is_some() || reset;
+            if let Some(rpc_url) = set_rpc {
+                cfg["rpc"] = serde_json::json!(rpc_url);
+            }
+            if let Some(kf) = set_keyfile {
+                cfg["default_keyfile"] = serde_json::json!(kf);
+            }
+            if let Some(net) = set_network {
+                cfg["network"] = serde_json::json!(net);
+            }
+
+            // Write back if any change was made
+            if any_change {
+                std::fs::write(&config_path, serde_json::to_string_pretty(&cfg).unwrap())?;
+                if output == OutputFormat::Pretty {
+                    eprintln!("✔ Config saved: {}", config_path.display());
+                }
+            }
+
+            // Always print current config
+            let display = serde_json::json!({
+                "config_file": config_path.display().to_string(),
+                "rpc": cfg.get("rpc").cloned().unwrap_or(serde_json::json!("https://testnet.truthlinked.org (default)")),
+                "default_keyfile": cfg.get("default_keyfile").cloned().unwrap_or(serde_json::json!(default_keyfile_path())),
+                "network": cfg.get("network").cloned().unwrap_or(serde_json::json!("testnet (default)")),
+            });
+            print_output(&display, output)?;
         }
 
         Commands::ValidatorInit { output: val_key_out, allocation } => {
