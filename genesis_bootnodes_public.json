@@ -1,5 +1,5 @@
 {
-  "network": "devnet",
+  "network": "testnet",
   "genesis_hash": "1088ee1231bbb865cfdcbc421e64247e76f355bd11911d991b256327dc50a974",
   "bootnodes": [
     {
