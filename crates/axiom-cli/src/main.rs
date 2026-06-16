@@ -4241,10 +4241,6 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
 
             let genesis_hash = fetch_genesis_hash(&client, &rpc, cli.retries)?;
             let genesis_hash_hex = hex::encode(genesis_hash);
-            let is_local_rpc = rpc.contains("localhost") || rpc.contains("127.0.0.1");
-            if genesis_hash[0..4] != [0, 0, 0, 0] && !is_local_rpc {
-                return Err("Faucet is only available on testnet".into());
-            }
 
             let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
             let nonce: u64 = rand::random();
