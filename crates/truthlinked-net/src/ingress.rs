@@ -193,7 +193,8 @@ mod tests {
         assert!(limiter.allow());
         assert!(!limiter.allow());
 
-        limiter.window_start = Instant::now() - Duration::from_secs(1);
+        // Simulate time passing by clearing old timestamps
+        std::thread::sleep(Duration::from_millis(1100));
         assert!(limiter.allow());
     }
 

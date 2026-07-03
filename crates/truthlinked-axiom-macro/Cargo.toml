@@ -9,3 +9,11 @@ readme = "README.md"
 repository = "https://github.com/truth-linked/truthlinked"
 keywords = ["truthlinked", "axiom", "macro", "cell"]
 categories = ["development-tools::procedural-macro-helpers"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"

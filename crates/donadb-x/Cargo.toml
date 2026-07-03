@@ -1,0 +1,135 @@
+[package]
+name        = "donadb-x"
+version     = "0.1.0"
+edition     = "2021"
+rust-version = "1.75"
+description = "Lock-free, memory-mapped storage engine for blockchain validator state. Commutative append log, N-shard atomic buffer swap, parallel BLAKE3 Merkle fold, crash-safe segment rotation."
+authors     = ["TruthLinked Labs <Donatus@truthlinked.org>"]
+license     = "Apache-2.0 OR MIT"
+readme      = "README.md"
+repository  = "https://github.com/truth-linked/truthlinked"
+homepage    = "https://truthlinked.org"
+documentation = "https://docs.rs/donadb-x"
+keywords    = ["database", "blockchain", "storage", "mmap", "lock-free"]
+categories  = ["database-implementations", "data-structures", "concurrency"]
+include = [
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
+    "src/**/*.rs",
+]
+
+# ── Runtime dependencies ──────────────────────────────────────────────────────
+
+[dependencies]
+# Memory-mapped file I/O
+memmap2       = "0.9"
+
+# BLAKE3 cryptographic hash (Merkle fold + state root)
+blake3        = "1.5"
+
+# Fast non-cryptographic hash for the shard index
+ahash         = "0.8"
+
+# Hex encoding used in doc examples and the bench display
+hex           = "0.4"
+
+# Low-overhead mutex / rwlock for shard index and fold synchronisation
+parking_lot   = "0.12"
+
+# Ergonomic error derivation
+thiserror     = "1"
+
+# Manifest serialisation (JSON segment metadata)
+serde         = { version = "1", features = ["derive"] }
+serde_json    = "1"
+
+# Structured logging facade (zero cost when no subscriber is installed)
+tracing       = "0.1"
+
+# Parallel BLAKE3 hashing across records during the fold pass
+rayon         = "1.10"
+
+# Wait-free atomic pointer swap used for the active/committed log pair
+arc-swap      = "1.7"
+
+# Fold-thread CPU affinity — pins the fold thread to core 1 to avoid
+# competing with writer threads on core 0
+core_affinity = "0.8"
+
+# Temporary directories in unit tests and the standalone bench binary
+tempfile      = "3"
+
+# Auto-detect the number of logical CPUs for default shard count
+num_cpus      = "1.17"
+
+# posix_fallocate(2) — physical disk block pre-allocation at segment creation
+libc          = "0.2"
+
+# Zero-copy value cache — Bytes is cheaply cloneable (Arc-backed)
+bytes         = "1"
+
+# Lock-free sharded map for the value cache — concurrent reads with no blocking
+dashmap       = "5"
+
+# ── Optional benchmark dependencies ──────────────────────────────────────────
+
+rocksdb  = { version = "0.21", optional = true }
+redb     = { version = "4.1",  optional = true }
+sled     = { version = "0.34", optional = true }
+lmdb-rkv = { version = "0.14", optional = true }
+pebbledb = { version = "0.0.1", optional = true }
+donadb   = { version = "0.1.3", optional = true }
+
+# ── Features ─────────────────────────────────────────────────────────────────
+
+[features]
+# No optional dependencies in the default build.
+default    = []
+
+# Enable the bench_vs_rocks binary (requires a RocksDB system library).
+rocks      = ["rocksdb"]
+
+# Enable bench_vs_all (RocksDB + redb + sled + LMDB + PebbleDB).
+allbenches = ["rocksdb", "redb", "sled", "lmdb-rkv", "pebbledb"]
+
+# Enable bench_vs_donadb (donadb 0.1.3 head-to-head comparison).
+vsdonadb   = ["donadb"]
+
+# ── Dev dependencies ──────────────────────────────────────────────────────────
+
+[dev-dependencies]
+tempfile = "3"
+proptest = "1"
+
+# ── Benchmark / example binaries ─────────────────────────────────────────────
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+
+[[bin]]
+name = "bench_mixed"
+path = "src/bin/bench_mixed.rs"
+
+[[bin]]
+name = "bench_vs_rocks"
+path = "src/bin/bench_vs_rocks.rs"
+required-features = ["rocks"]
+
+[[bin]]
+name = "bench_vs_all"
+path = "src/bin/bench_vs_all.rs"
+required-features = ["allbenches"]
+
+[[bin]]
+name = "bench_vs_donadb"
+path = "src/bin/bench_vs_donadb.rs"
+required-features = ["vsdonadb"]
+
+# ── Release profile ───────────────────────────────────────────────────────────
+
+[profile.release]
+opt-level = 3
+lto       = "thin"
